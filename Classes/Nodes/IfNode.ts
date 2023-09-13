@@ -1,20 +1,22 @@
 import BaseNode from "./BaseNode";
 
-export type Case = [BaseNode, boolean];
+export default class IfNode extends BaseNode {
+	public conditionNode: BaseNode;
+	public ifBody: BaseNode;
+	public elseBody: BaseNode | null;
+	public shouldReturnNull: boolean;
 
-class IfNode extends BaseNode {
-  public cases: Case[];
-  public elseCase: Case;
+	constructor(
+		conditionNode: BaseNode,
+		ifBody: BaseNode,
+		elseBody: BaseNode | null,
+		shouldReturnNull: boolean
+	) {
+		super(ifBody.posStart, (ifBody || elseBody).posEnd);
 
-  constructor(cases: Case[], elseCase: Case) {
-    super(
-      cases[0][0].posStart,
-      (elseCase || cases[cases.length - 1])[0].posEnd
-    );
-
-    this.cases = cases;
-    this.elseCase = elseCase;
-  }
+		this.conditionNode = conditionNode;
+		this.ifBody = ifBody;
+		this.elseBody = elseBody;
+		this.shouldReturnNull = shouldReturnNull;
+	}
 }
-
-export default IfNode;

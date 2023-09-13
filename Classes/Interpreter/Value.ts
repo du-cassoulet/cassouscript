@@ -1,184 +1,109 @@
 import Context from "../Context";
-import Errors from "../Errors";
+import { InvalidSyntaxError } from "../Errors";
 import Position from "../Position";
 
-class Value {
+export default class Value {
+	public posStart: Position | null = null;
+	public posEnd: Position | null = null;
+	public context: Context | null = null;
+
 	constructor() {
 		this.setPos();
-		this.setContext();
 	}
 
-	/**
-	 * To define the value's position
-	 * @param {Position | null} posStart
-	 * @param {Position | null} posEnd
-	 * @returns {Value}
-	 */
-	setPos(posStart = null, posEnd = null) {
+	public setPos(
+		posStart: Position | null = null,
+		posEnd: Position | null = null
+	) {
 		this.posStart = posStart;
 		this.posEnd = posEnd;
 		return this;
 	}
 
-	/**
-	 * To define the value's context.
-	 * @param {Context} context
-	 * @returns {Value}
-	 */
-	setContext(context) {
+	public setContext(context: Context | null = null) {
 		this.context = context;
 		return this;
 	}
 
-	/**
-	 * @param {Value} other
-	 * @returns {[Value, Errors.BaseError]}
-	 */
-	addedTo(other) {
+	public addedTo(other: Value) {
 		return [null, this.illegalOperation(other)];
 	}
 
-	/**
-	 * @param {Value} other
-	 * @returns {[Value, Errors.BaseError]}
-	 */
-	subbedBy(other) {
+	public subbedBy(other: Value) {
 		return [null, this.illegalOperation(other)];
 	}
 
-	/**
-	 * @param {Value} other
-	 * @returns {[Value, Errors.BaseError]}
-	 */
-	multedBy(other) {
+	public multedBy(other: Value) {
 		return [null, this.illegalOperation(other)];
 	}
 
-	/**
-	 * @param {Value} other
-	 * @returns {[Value, Errors.BaseError]}
-	 */
-	divedBy(other) {
+	public divedBy(other: Value) {
 		return [null, this.illegalOperation(other)];
 	}
 
-	/**
-	 * @param {Value} other
-	 * @returns {[Value, Errors.BaseError]}
-	 */
-	powedBy(other) {
+	public powedBy(other: Value) {
 		return [null, this.illegalOperation(other)];
 	}
 
-	/**
-	 * @param {Value} other
-	 * @returns {[Value, Errors.BaseError]}
-	 */
-	moduledBy(other) {
+	public moduledBy(other: Value) {
 		return [null, this.illegalOperation(other)];
 	}
 
-	/**
-	 * @param {Value} other
-	 * @returns {[Value, Errors.BaseError]}
-	 */
-	getComparisonEq(other) {
+	public getComparisonEq(other: Value) {
 		return [null, this.illegalOperation(other)];
 	}
 
-	/**
-	 * @param {Value} other
-	 * @returns {[Value, Errors.BaseError]}
-	 */
-	getComparisonNe(other) {
+	public getComparisonNe(other: Value) {
 		return [null, this.illegalOperation(other)];
 	}
 
-	/**
-	 * @param {Value} other
-	 * @returns {[Value, Errors.BaseError]}
-	 */
-	getComparisonLt(other) {
+	public getComparisonLt(other: Value) {
 		return [null, this.illegalOperation(other)];
 	}
 
-	/**
-	 * @param {Value} other
-	 * @returns {[Value, Errors.BaseError]}
-	 */
-	getComparisonGt(other) {
+	public getComparisonGt(other: Value) {
 		return [null, this.illegalOperation(other)];
 	}
 
-	/**
-	 * @param {Value} other
-	 * @returns {[Value, Errors.BaseError]}
-	 */
-	getComparisonLte(other) {
+	public getComparisonLte(other: Value) {
 		return [null, this.illegalOperation(other)];
 	}
 
-	/**
-	 * @param {Value} other
-	 * @returns {[Value, Errors.BaseError]}
-	 */
-	getComparisonGte(other) {
+	public getComparisonGte(other: Value) {
 		return [null, this.illegalOperation(other)];
 	}
 
-	/**
-	 * @param {Value} other
-	 * @returns {[Value, Errors.BaseError]}
-	 */
-	andedBy(other) {
+	public andedBy(other: Value) {
 		return [null, this.illegalOperation(other)];
 	}
 
-	/**
-	 * @param {Value} other
-	 * @returns {[Value, Errors.BaseError]}
-	 */
-	oredBy(other) {
+	public oredBy(other: Value) {
 		return [null, this.illegalOperation(other)];
 	}
 
-	notted() {
+	public notted() {
 		return [null, this.illegalOperation()];
 	}
 
-	execute() {
+	public execute() {
 		return [null, this.illegalOperation()];
 	}
 
-	/**
-	 * @param {Value} other
-	 * @returns {[Value, Errors.BaseError]}
-	 */
-	isIn(other) {
-		return [null, this.illegalOperation(other)];
-	}
-
-	copy() {
+	public copy() {
 		throw new Error("No copy method defined");
 	}
 
-	isTrue() {
+	public isTrue() {
 		return true;
 	}
 
-	/**
-	 * @param {Value | null} other
-	 * @returns {Errors.InvalidSyntaxError}
-	 */
-	illegalOperation(other = null) {
+	public illegalOperation(other: Value | null = null) {
 		if (!other) other = this;
-		return new Errors.InvalidSyntaxError(
-			this.posStart,
-			this.posEnd,
-			"Illegal operation",
-			this.context
+
+		return new InvalidSyntaxError(
+			<Position>this.posStart,
+			<Position>this.posEnd,
+			"Illegal operation"
 		);
 	}
 }
-
-export default Value;

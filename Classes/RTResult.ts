@@ -1,11 +1,17 @@
-import Errors from "./Errors";
+import Error from "./Errors";
 
-class RTResult {
+export default class RTResult {
+	public value: any = null;
+	public error: Error | null = null;
+	public funcReturnValue: any = null;
+	public loopShouldContinue: boolean = false;
+	public loopShouldBreak: boolean = false;
+
 	constructor() {
 		this.reset();
 	}
 
-	reset() {
+	public reset() {
 		this.value = null;
 		this.error = null;
 		this.funcReturnValue = null;
@@ -13,12 +19,7 @@ class RTResult {
 		this.loopShouldBreak = false;
 	}
 
-	/**
-	 * To register an element in the Runtime Result.
-	 * @param {RTResult} res
-	 * @returns {any}
-	 */
-	register(res) {
+	public register(res: RTResult) {
 		this.error = res.error;
 		this.funcReturnValue = res.funcReturnValue;
 		this.loopShouldContinue = res.loopShouldContinue;
@@ -27,56 +28,41 @@ class RTResult {
 		return res.value;
 	}
 
-	/**
-	 * To end a task without error.
-	 * @param {any} value
-	 * @returns {RTResult}
-	 */
-	success(value) {
+	public success(value: any) {
 		this.reset();
 		this.value = value;
 
 		return this;
 	}
 
-	/**
-	 * To end a task without error and by returning an element.
-	 * @param {any} value
-	 * @returns {RTResult}
-	 */
-	successReturn(value) {
+	public successReturn(value: any) {
 		this.reset();
 		this.funcReturnValue = value;
 
 		return this;
 	}
 
-	successContinue() {
+	public successContinue() {
 		this.reset();
 		this.loopShouldContinue = true;
 
 		return this;
 	}
 
-	successBreak() {
+	public successBreak() {
 		this.reset();
 		this.loopShouldBreak = true;
 		return this;
 	}
 
-	/**
-	 * To end a task with an error.
-	 * @param {Errors.BaseError} error
-	 * @returns {RTResult}
-	 */
-	failure(error) {
+	public failure(error: Error) {
 		this.reset();
 		this.error = error;
 
 		return this;
 	}
 
-	shouldReturn() {
+	public shouldReturn() {
 		return (
 			this.error ||
 			this.funcReturnValue ||
@@ -85,5 +71,3 @@ class RTResult {
 		);
 	}
 }
-
-export default RTResult;

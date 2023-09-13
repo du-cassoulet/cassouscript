@@ -1,18 +1,8 @@
 import Position from "../Position";
 import BaseNode from "./BaseNode";
 
-class BreakNode extends BaseNode {
-	/**
-	 *
-	 * @param {Position} posStart
-	 * @param {Position} posEnd
-	 */
-	constructor(posStart, posEnd) {
-		super();
-
-		this.posStart = posStart;
-		this.posEnd = posEnd;
+export default class BreakNode extends BaseNode {
+	constructor(posStart: Position, posEnd: Position) {
+		super(posStart, posEnd);
 	}
 }
-
-export default BreakNode;

@@ -10,24 +10,20 @@ const globalSymbolTable = new SymbolTable();
 globalSymbolTable.set("pi", Number.pi);
 globalSymbolTable.set("log", BuiltInFunction.log);
 
-/**
- * @param {string} fn
- * @param {string} text
- * @returns {[]}
- */
-export function run(fn, text) {
-  const lexer = new Lexer(fn, text);
-  const { tokens, error } = lexer.makeToken();
-  if (error) return [null, error];
+export function run(fn: string, text: string) {
+	const lexer = new Lexer(fn, text);
+	const { tokens, error } = lexer.makeToken();
+	if (error) return { value: null, error };
 
-  const parser = new Parser(tokens);
-  const ast = parser.parse();
-  if (ast.error) return [null, ast.error];
+	const parser = new Parser(tokens);
+	const ast = parser.parse();
+	if (ast.error) return { value: null, error: ast.error };
 
-  const interpreter = new Interpreter();
-  const context = new Context("<program>");
-  context.symbolTable = globalSymbolTable;
-  const result = interpreter.visit(ast.node, context);
+	const context = new Context("<program>");
+	context.symbolTable = globalSymbolTable;
 
-  return [result.value, result.error];
+	const interpreter = new Interpreter();
+	const result = interpreter.visit(ast.node, context);
+
+	return { value: result.value, error: result.error };
 }

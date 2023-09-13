@@ -1,16 +1,14 @@
-class SymbolTable {
-	constructor(parent = null) {
+export default class SymbolTable {
+	public symbols: { [key: string]: any };
+	public parent: SymbolTable | null;
+
+	constructor(parent: SymbolTable | null = null) {
 		this.symbols = {};
 		this.parent = parent;
 	}
 
-	/**
-	 * To get a value from the symbol table and it's parent(s).
-	 * @param {string} name
-	 * @returns {any}
-	 */
-	get(name) {
-		let value = this.symbols[name];
+	public get(name: string): any {
+		const value = this.symbols[name];
 		if (!value && this.parent) {
 			return this.parent.get(name);
 		}
@@ -18,22 +16,20 @@ class SymbolTable {
 		return value;
 	}
 
-	/**
-	 * To edit or create a value in the symbol table.
-	 * @param {string} name
-	 * @param {any} value
-	 */
-	set(name, value) {
+	public has(name: string): boolean {
+		const exists = name in this.symbols;
+		if (!exists && this.parent) {
+			return this.parent.has(name);
+		}
+
+		return exists;
+	}
+
+	public set(name: string, value: any) {
 		this.symbols[name] = value;
 	}
 
-	/**
-	 * To remove an element from the symbol table.
-	 * @param {string} name
-	 */
-	remove(name) {
+	public remove(name: string) {
 		delete this.symbols[name];
 	}
 }
-
-export default SymbolTable;

@@ -5,39 +5,37 @@ import BaseFunction from "./BaseFunction";
 import Value from "./Value";
 import Void from "./Void";
 
-class Function extends BaseFunction {
-	/**
-	 * @param {string} name
-	 * @param {BaseNode} bodyNode
-	 * @param {string[]} argNames
-	 * @param {string} typeTok
-	 * @param {boolean} shouldAutoReturn
-	 */
-	constructor(name, bodyNode, argNames, type, shouldAutoReturn) {
+export default class Function extends BaseFunction {
+	public bodyNode: BaseNode;
+	public argNames: string[];
+	public shouldAutoReturn: boolean;
+
+	constructor(
+		name: string,
+		bodyNode: BaseNode,
+		argNames: string[],
+		shouldAutoReturn: boolean
+	) {
 		super(name);
 
 		this.bodyNode = bodyNode;
 		this.argNames = argNames;
-		this.type = type;
 		this.shouldAutoReturn = shouldAutoReturn;
 	}
 
-	/**
-	 * @param {Value} args
-	 * @returns {RTResult}
-	 */
-	execute(args) {
-		let res = new RTResult();
-		let interpreter = new Interpreter();
-		let execCtx = this.generateNewContext();
+	// @ts-ignore
+	public execute(args: Value[]): any {
+		const res = new RTResult();
+		const interpreter = new Interpreter();
+		const execCtx = this.generateNewContext();
 
 		res.register(this.checkAndPopulateArgs(this.argNames, args, execCtx));
 		if (res.shouldReturn()) return res;
 
-		let value = res.register(interpreter.visit(this.bodyNode, execCtx));
+		const value = res.register(interpreter.visit(this.bodyNode, execCtx));
 		if (res.shouldReturn() && res.funcReturnValue === null) return res;
 
-		let retValue =
+		const retValue =
 			(this.shouldAutoReturn ? value : null) ||
 			res.funcReturnValue ||
 			new Void(null);
@@ -45,25 +43,21 @@ class Function extends BaseFunction {
 		return res.success(retValue);
 	}
 
-	copy() {
-		let copy = new Function(
+	public copy() {
+		const copy = new Function(
 			this.name,
 			this.bodyNode,
 			this.argNames,
-			this.type,
 			this.shouldAutoReturn
 		);
 
 		copy.setContext(this.context);
 		copy.setPos(this.posStart, this.posEnd);
+
 		return copy;
 	}
 
-	toString() {
-		return `<function ${this.name}${
-			this.type ? `for the type '${this.type}'` : ""
-		}>`.cyan;
+	public toString() {
+		return `<function ${this.name}>`;
 	}
 }
-
-export default Function;

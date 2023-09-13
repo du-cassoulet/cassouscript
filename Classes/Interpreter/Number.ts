@@ -1,81 +1,69 @@
-import Errors from "../Errors";
+import { RTError } from "../Errors";
 import Value from "./Value";
-import List from "./List";
 import Boolean from "./Boolean";
 import String from "./String";
+import Position from "../Position";
+import Context from "../Context";
+import chalk from "chalk";
 
-class Number extends Value {
+export default class Number extends Value {
+	public value: number;
 	static pi = new Number(Math.PI);
 
-	/**
-	 * @param {number} value
-	 */
-	constructor(value) {
+	constructor(value: number) {
 		super();
 		this.value = value;
 	}
 
-	/**
-	 * @param {Value} other
-	 * @returns {[Value, Errors.BaseError]}
-	 */
-	addedTo(other) {
+	public addedTo(other: Value): any {
 		if (other instanceof Number) {
 			return [
 				new Number(this.value + other.value).setContext(this.context),
 				null,
 			];
-		}
-		if (other instanceof String) {
+		} else if (other instanceof String) {
 			return [
 				new String(this.value + other.value).setContext(this.context),
 				null,
 			];
 		} else {
-			return [null, this.illegalOperation(this.posStart, this.posEnd)];
+			return [null, this.illegalOperation(other)];
 		}
 	}
 
-	/**
-	 * @param {Value} other
-	 * @returns {[Value, Errors.BaseError]}
-	 */
-	subbedBy(other) {
+	public subbedBy(other: Value): any {
 		if (other instanceof Number) {
 			return [
 				new Number(this.value - other.value).setContext(this.context),
 				null,
 			];
 		} else {
-			return [null, this.illegalOperation(this.posStart, this.posEnd)];
+			return [null, this.illegalOperation(other)];
 		}
 	}
 
-	/**
-	 * @param {Value} other
-	 * @returns {[Value, Errors.BaseError]}
-	 */
-	multedBy(other) {
+	public multedBy(other: Value): any {
 		if (other instanceof Number) {
 			return [
 				new Number(this.value * other.value).setContext(this.context),
 				null,
 			];
 		} else {
-			return [null, this.illegalOperation(this.posStart, this.posEnd)];
+			return [null, this.illegalOperation(other)];
 		}
 	}
 
-	/**
-	 * @param {Value} other
-	 * @returns {[Value, Errors.BaseError]}
-	 */
-	divedBy(other) {
+	public divedBy(other: Value): any {
 		if (other instanceof Number) {
 			if (other.value === 0) {
 				return [
 					null,
-					new Errors.RTError(other.posStart, other.posEnd, "Division by zero"),
+					new RTError(
+						<Position>other.posStart,
+						<Position>other.posEnd,
+						"Division by zero",
+						<Context>this.context
+					),
 				];
 			}
 
@@ -84,190 +72,126 @@ class Number extends Value {
 				null,
 			];
 		} else {
-			return [null, this.illegalOperation(this.posStart, this.posEnd)];
+			return [null, this.illegalOperation(other)];
 		}
 	}
 
-	/**
-	 * @param {Value} other
-	 * @returns {[Value, Errors.BaseError]}
-	 */
-	powedBy(other) {
+	public powedBy(other: Value): any {
 		if (other instanceof Number) {
 			return [
 				new Number(this.value ** other.value).setContext(this.context),
 				null,
 			];
 		} else {
-			return [null, this.illegalOperation(this.posStart, this.posEnd)];
+			return [null, this.illegalOperation(other)];
 		}
 	}
 
-	/**
-	 * @param {Value} other
-	 * @returns {[Value, Errors.BaseError]}
-	 */
-	moduledBy(other) {
-		return [
-			new Number(this.value % other.value).setContext(this.context),
-			null,
-		];
+	public moduledBy(other: Value): any {
+		if (other instanceof Number) {
+			return [
+				new Number(this.value % other.value).setContext(this.context),
+				null,
+			];
+		} else {
+			return [null, this.illegalOperation(other)];
+		}
 	}
 
-	/**
-	 * @param {Value} other
-	 * @returns {[Value, Errors.BaseError]}
-	 */
-	getComparisonEq(other) {
+	public getComparisonEq(other: Value): any {
 		if (other instanceof Number) {
 			return [
 				new Boolean(this.value === other.value).setContext(this.context),
 				null,
 			];
 		} else {
-			return [null, this.illegalOperation(this.posStart, this.posEnd)];
+			return [null, this.illegalOperation(other)];
 		}
 	}
 
-	/**
-	 * @param {Value} other
-	 * @returns {[Value, Errors.BaseError]}
-	 */
-	getComparisonNe(other) {
+	public getComparisonNe(other: Value): any {
 		if (other instanceof Number) {
 			return [
 				new Boolean(this.value !== other.value).setContext(this.context),
 				null,
 			];
 		} else {
-			return [null, this.illegalOperation(this.posStart, this.posEnd)];
+			return [null, this.illegalOperation(other)];
 		}
 	}
 
-	/**
-	 * @param {Value} other
-	 * @returns {[Value, Errors.BaseError]}
-	 */
-	getComparisonLt(other) {
+	public getComparisonLt(other: Value): any {
 		if (other instanceof Number) {
 			return [
 				new Boolean(this.value < other.value).setContext(this.context),
 				null,
 			];
 		} else {
-			return [null, this.illegalOperation(this.posStart, this.posEnd)];
+			return [null, this.illegalOperation(other)];
 		}
 	}
 
-	/**
-	 * @param {Value} other
-	 * @returns {[Value, Errors.BaseError]}
-	 */
-	getComparisonGt(other) {
+	public getComparisonGt(other: Value): any {
 		if (other instanceof Number) {
 			return [
 				new Boolean(this.value > other.value).setContext(this.context),
 				null,
 			];
 		} else {
-			return [null, this.illegalOperation(this.posStart, this.posEnd)];
+			return [null, this.illegalOperation(other)];
 		}
 	}
 
-	/**
-	 * @param {Value} other
-	 * @returns {[Value, Errors.BaseError]}
-	 */
-	getComparisonLte(other) {
+	public getComparisonLte(other: Value): any {
 		if (other instanceof Number) {
 			return [
 				new Boolean(this.value <= other.value).setContext(this.context),
 				null,
 			];
 		} else {
-			return [null, this.illegalOperation(this.posStart, this.posEnd)];
+			return [null, this.illegalOperation(other)];
 		}
 	}
 
-	/**
-	 * @param {Value} other
-	 * @returns {[Value, Errors.BaseError]}
-	 */
-	getComparisonGte(other) {
+	public getComparisonGte(other: Value): any {
 		if (other instanceof Number) {
 			return [
 				new Boolean(this.value >= other.value).setContext(this.context),
 				null,
 			];
 		} else {
-			return [null, this.illegalOperation(this.posStart, this.posEnd)];
+			return [null, this.illegalOperation(other)];
 		}
 	}
 
-	/**
-	 * @param {Value} other
-	 * @returns {[Value, Errors.BaseError]}
-	 */
-	andedBy(other) {
-		if (other instanceof Number) {
-			return [
-				new Boolean(this.value && other.value).setContext(this.context),
-				null,
-			];
-		} else {
-			return [null, this.illegalOperation(this.posStart, this.posEnd)];
-		}
-	}
-
-	/**
-	 * @param {Value} other
-	 * @returns {[Value, Errors.BaseError]}
-	 */
-	oredBy(other) {
+	public oredBy(other: Value): any {
 		if (other instanceof Number) {
 			return [
 				new Number(this.value || other.value).setContext(this.context),
 				null,
 			];
 		} else {
-			return [null, this.illegalOperation(this.posStart, this.posEnd)];
+			return [null, this.illegalOperation(other)];
 		}
 	}
 
-	notted() {
+	public notted(): any {
 		return [new Boolean(!this.value).setContext(this.context), null];
 	}
 
-	/**
-	 * @param {Value} other
-	 * @returns {[Value, Errors.BaseError]}
-	 */
-	isIn(other) {
-		if (other instanceof List) {
-			let includes = !!other.elements.find(
-				(e) =>
-					this.constructor.name === e.constructor.name && this.value === e.value
-			);
-			return [new Boolean(includes), null];
-		} else {
-			return [null, this.illegalOperation(this.posStart, this.posEnd)];
-		}
-	}
-
-	copy() {
-		let copy = new Number(this.value);
+	public copy() {
+		const copy = new Number(this.value);
 		copy.setPos(this.posStart, this.posEnd);
 		copy.setContext(this.context);
+
 		return copy;
 	}
 
-	isTrue() {
+	public isTrue() {
 		return this.value !== 0;
 	}
 
-	toString() {
-		return this.value.toString().yellow;
+	public toString() {
+		return chalk.yellow(this.value.toString());
 	}
 }
-
-export default Number;

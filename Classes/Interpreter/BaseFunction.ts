@@ -2,53 +2,54 @@ import Context from "../Context";
 import RTResult from "../RTResult";
 import SymbolTable from "../SymbolTable";
 import Value from "./Value";
-import Errors from "../Errors";
+import { RTError } from "../Errors";
+import Position from "../Position";
 
-class BaseFunction extends Value {
-	/**
-	 * @param {string} name
-	 */
-	constructor(name) {
+export default class BaseFunction extends Value {
+	public name: string;
+	public context: Context | null = null;
+	public posStart: Position | null = null;
+	public posEnd: Position | null = null;
+
+	constructor(name: string) {
 		super();
 		this.name = name || "anonymous";
 	}
 
-	generateNewContext() {
-		let newContext = new Context(this.name, this.context, this.posStart);
-		newContext.symbolTable = new SymbolTable(newContext.parent.symbolTable);
+	public generateNewContext() {
+		const newContext = new Context(this.name, this.context, this.posStart);
+		newContext.symbolTable = new SymbolTable(
+			newContext.parent?.symbolTable ?? null
+		);
+
 		return newContext;
 	}
 
-	/**
-	 * @param {string[]} argNames
-	 * @param {Value[]} args
-	 * @returns {RTResult}
-	 */
-	checkArgs(argNames, args) {
-		let res = new RTResult();
+	public checkArgs(argNames: string[], args: Value[]) {
+		const res = new RTResult();
 
 		if (args.length > argNames.length) {
 			return res.failure(
-				new Errors.RTError(
-					this.posStart,
-					this.posEnd,
+				new RTError(
+					<Position>this.posStart,
+					<Position>this.posEnd,
 					`${args.length - argNames.length} too many args passed into '${
 						this.name
 					}'`,
-					this.context
+					<Context>this.context
 				)
 			);
 		}
 
 		if (args.length < argNames.length) {
 			return res.failure(
-				new Errors.RTError(
-					this.posStart,
-					this.posEnd,
+				new RTError(
+					<Position>this.posStart,
+					<Position>this.posEnd,
 					`${argNames.length - args.length} too few args passed into '${
 						this.name
 					}'`,
-					this.context
+					<Context>this.context
 				)
 			);
 		}
@@ -56,27 +57,22 @@ class BaseFunction extends Value {
 		return res.success(null);
 	}
 
-	/**
-	 * @param {string[]} argNames
-	 * @param {Vlaue[]} args
-	 * @param {Context} execCtx
-	 */
-	populateArgs(argNames, args, execCtx) {
+	public populateArgs(argNames: string[], args: Value[], execCtx: Context) {
 		for (const i in args) {
-			let argName = argNames[i];
-			let argValue = args[i];
+			const argName = argNames[i];
+			const argValue = args[i];
+
 			argValue.setContext(execCtx);
-			execCtx.symbolTable.set(argName, argValue);
+			execCtx.symbolTable?.set(argName, argValue);
 		}
 	}
 
-	/**
-	 * @param {string[]} argNames
-	 * @param {Vlaue[]} args
-	 * @param {Context} execCtx
-	 */
-	checkAndPopulateArgs(argNames, args, execCtx) {
-		let res = new RTResult();
+	public checkAndPopulateArgs(
+		argNames: string[],
+		args: Value[],
+		execCtx: Context
+	) {
+		const res = new RTResult();
 		res.register(this.checkArgs(argNames, args));
 		if (res.shouldReturn()) return res;
 
@@ -84,5 +80,3 @@ class BaseFunction extends Value {
 		return res.success(null);
 	}
 }
-
-export default BaseFunction;

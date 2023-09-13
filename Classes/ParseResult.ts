@@ -2,48 +2,48 @@ import Error from "./Errors";
 import BaseNode from "./Nodes/BaseNode";
 
 export default class ParseResult {
-  public error: Error | null = null;
-  public node: BaseNode | any = null;
-  public lastRegisteredAdvanceCount: number = 0;
-  public advanceCount: number = 0;
-  public toReverseCount: number = 0;
+	public error: Error | null = null;
+	public node: BaseNode | any = null;
+	public lastRegisteredAdvanceCount: number = 0;
+	public advanceCount: number = 0;
+	public toReverseCount: number = 0;
 
-  constructor() {}
+	constructor() {}
 
-  registerAdvancement() {
-    this.lastRegisteredAdvanceCount = 1;
-    this.advanceCount++;
-  }
+	public registerAdvancement() {
+		this.lastRegisteredAdvanceCount = 1;
+		this.advanceCount++;
+	}
 
-  register(res: ParseResult) {
-    this.lastRegisteredAdvanceCount = res.advanceCount;
-    this.advanceCount += res.advanceCount;
+	public register(res: ParseResult) {
+		this.lastRegisteredAdvanceCount = res.advanceCount;
+		this.advanceCount += res.advanceCount;
 
-    if (res.error) {
-      this.error = res.error;
-    }
+		if (res.error) {
+			this.error = res.error;
+		}
 
-    return res.node;
-  }
+		return res.node;
+	}
 
-  tryRegister(res: ParseResult) {
-    if (res.error) {
-      this.toReverseCount = res.advanceCount;
-      return null;
-    }
+	public tryRegister(res: ParseResult) {
+		if (res.error) {
+			this.toReverseCount = res.advanceCount;
+			return null;
+		}
 
-    return this.register(res);
-  }
+		return this.register(res);
+	}
 
-  success(value: BaseNode | any) {
-    this.node = value;
-    return this;
-  }
+	public success(value: BaseNode) {
+		this.node = value;
+		return this;
+	}
 
-  failure(error: Error) {
-    if (!this.error || this.advanceCount === 0) {
-      this.error = error;
-    }
-    return this;
-  }
+	public failure(error: Error) {
+		if (!this.error || this.advanceCount === 0) {
+			this.error = error;
+		}
+		return this;
+	}
 }

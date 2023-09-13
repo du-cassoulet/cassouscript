@@ -1,13 +1,14 @@
 import Token from "../Token";
 import BaseNode from "./BaseNode";
 
-class VarAccessNode extends BaseNode {
-  public varNameTok: Token;
+export default class VarAccessNode extends BaseNode {
+	public varNameTok: Token;
+	public keys: string[];
 
-  constructor(varNameTok: Token) {
-    super(varNameTok.posStart, varNameTok.posEnd);
-    this.varNameTok = varNameTok;
-  }
+	constructor(varNameTok: Token, keys: string[]) {
+		super(varNameTok.posStart, varNameTok.posEnd);
+
+		this.varNameTok = varNameTok;
+		this.keys = keys;
+	}
 }
-
-export default VarAccessNode;

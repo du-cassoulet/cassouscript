@@ -1,28 +1,27 @@
 import Value from "./Value";
+import chalk from "chalk";
 
-class Void extends Value {
-	/**
-	 * @param {void} value
-	 */
-	constructor(value) {
+export default class Void extends Value {
+	public value: null | number;
+
+	constructor(value: null | number) {
 		super();
 		this.value = value;
 	}
 
-	copy() {
-		let copy = new Void(this.value);
+	public copy() {
+		const copy = new Void(this.value);
 		copy.setPos(this.posStart, this.posEnd);
 		copy.setContext(this.context);
+
 		return copy;
 	}
 
-	isTrue() {
+	public isTrue() {
 		return false;
 	}
 
-	toString() {
-		return `${this.value}`.gray;
+	public toString() {
+		return chalk.black(`${this.value}`);
 	}
 }
-
-export default Void;

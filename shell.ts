@@ -1,20 +1,35 @@
-import PromptSync from "prompt-sync";
 import { run } from "./index";
+import { createInterface } from "readline";
 
-const prompt = PromptSync({ sigint: true });
+function listen() {
+	const readline = createInterface({
+		input: process.stdin,
+		output: process.stdout,
+	});
 
-while (true) {
-  let text = prompt("Csc >> ");
-  if (text.trim() === "") continue;
-  let [result, error] = run("<stdin>", text);
+	readline.on("SIGINT", () => {
+		readline.close();
+		process.stdout.write("^C\n");
+	});
 
-  if (error) {
-    console.log(error.asString());
-  } else if (result) {
-    if (result.elements.length === 1) {
-      console.log(result.elements[0].toString());
-    } else {
-      console.log(result.toString());
-    }
-  }
+	readline.question("Csc >> ", (text: string) => {
+		if (text === ".exit") return readline.close();
+		const { value, error } = run("<stdin>", text);
+
+		if (error) {
+			console.log(error.toString());
+		} else if (value) {
+			if (value.elements.length === 1) {
+				console.log(value.elements[0].toString());
+			} else {
+				console.log(value.toString());
+			}
+		}
+
+		readline.removeAllListeners("SIGINT");
+		readline.close();
+		return listen();
+	});
 }
+
+listen();

@@ -1,116 +1,88 @@
 import Value from "./Value";
+import chalk from "chalk";
 
-class Boolean extends Value {
-	/**
-	 * @param {boolean} value
-	 */
-	constructor(value) {
+export default class Boolean extends Value {
+	public value: boolean;
+
+	constructor(value: boolean) {
 		super();
 		this.value = value;
 	}
 
-	/**
-	 * @param {Value} other
-	 * @returns {[Value, Errors.BaseError]}
-	 */
-	getComparisonEq(other) {
+	public getComparisonEq(other: Value): any {
 		if (other instanceof Boolean) {
 			return [
 				new Boolean(this.value === other.value).setContext(this.context),
 				null,
 			];
 		} else {
-			return [null, this.illegalOperation(this.posStart, this.posEnd)];
+			return [null, this.illegalOperation(other)];
 		}
 	}
 
-	/**
-	 * @param {Value} other
-	 * @returns {[Value, Errors.BaseError]}
-	 */
-	getComparisonNe(other) {
+	public getComparisonNe(other: Value): any {
 		if (other instanceof Boolean) {
 			return [
 				new Boolean(this.value !== other.value).setContext(this.context),
 				null,
 			];
 		} else {
-			return [null, this.illegalOperation(this.posStart, this.posEnd)];
+			return [null, this.illegalOperation(other)];
 		}
 	}
 
-	/**
-	 * @param {Value} other
-	 * @returns {[Value, Errors.BaseError]}
-	 */
-	getComparisonLt(other) {
+	public getComparisonLt(other: Value): any {
 		if (other instanceof Boolean) {
 			return [
 				new Boolean(this.value < other.value).setContext(this.context),
 				null,
 			];
 		} else {
-			return [null, this.illegalOperation(this.posStart, this.posEnd)];
+			return [null, this.illegalOperation(other)];
 		}
 	}
 
-	/**
-	 * @param {Value} other
-	 * @returns {[Value, Errors.BaseError]}
-	 */
-	getComparisonGt(other) {
+	public getComparisonGt(other: Value): any {
 		if (other instanceof Boolean) {
 			return [
 				new Boolean(this.value > other.value).setContext(this.context),
 				null,
 			];
 		} else {
-			return [null, this.illegalOperation(this.posStart, this.posEnd)];
+			return [null, this.illegalOperation(other)];
 		}
 	}
 
-	/**
-	 * @param {Value} other
-	 * @returns {[Value, Errors.BaseError]}
-	 */
-	getComparisonLte(other) {
+	public getComparisonLte(other: Value): any {
 		if (other instanceof Boolean) {
 			return [
 				new Boolean(this.value <= other.value).setContext(this.context),
 				null,
 			];
 		} else {
-			return [null, this.illegalOperation(this.posStart, this.posEnd)];
+			return [null, this.illegalOperation(other)];
 		}
 	}
 
-	/**
-	 * @param {Value} other
-	 * @returns {[Value, Errors.BaseError]}
-	 */
-	getComparisonGte(other) {
+	public getComparisonGte(other: Value): any {
 		if (other instanceof Boolean) {
 			return [
 				new Boolean(this.value >= other.value).setContext(this.context),
 				null,
 			];
 		} else {
-			return [null, this.illegalOperation(this.posStart, this.posEnd)];
+			return [null, this.illegalOperation(other)];
 		}
 	}
 
-	/**
-	 * @param {Value} other
-	 * @returns {[Value, Errors.BaseError]}
-	 */
-	andedBy(other) {
+	public andedBy(other: Value): any {
 		if (other instanceof Boolean) {
 			return [
 				new Boolean(this.value && other.value).setContext(this.context),
 				null,
 			];
 		} else {
-			return [null, this.illegalOperation(this.posStart, this.posEnd)];
+			return [null, this.illegalOperation(other)];
 		}
 	}
 
@@ -118,35 +90,34 @@ class Boolean extends Value {
 	 * @param {Value} other
 	 * @returns {[Value, Errors.BaseError]}
 	 */
-	oredBy(other) {
+	public oredBy(other: Value): any {
 		if (other instanceof Boolean) {
 			return [
 				new Boolean(this.value || other.value).setContext(this.context),
 				null,
 			];
 		} else {
-			return [null, this.illegalOperation(this.posStart, this.posEnd)];
+			return [null, this.illegalOperation(other)];
 		}
 	}
 
-	notted() {
+	public notted(): any {
 		return [new Boolean(!this.value).setContext(this.context), null];
 	}
 
-	copy() {
-		let copy = new Boolean(this.value);
+	public copy() {
+		const copy = new Boolean(this.value);
 		copy.setPos(this.posStart, this.posEnd);
 		copy.setContext(this.context);
+
 		return copy;
 	}
 
-	isTrue() {
+	public isTrue() {
 		return this.value;
 	}
 
-	toString() {
-		return this.value.toString().yellow;
+	public toString() {
+		return chalk.yellow(this.value.toString());
 	}
 }
-
-export default Boolean;

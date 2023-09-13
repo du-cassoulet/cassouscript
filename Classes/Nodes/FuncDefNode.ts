@@ -1,33 +1,30 @@
 import Token from "../Token";
 import BaseNode from "./BaseNode";
 
-class FuncDefNode extends BaseNode {
-	/**
-	 * @param {Token} varNameTok
-	 * @param {Token[]} argNameToks
-	 * @param {BaseNode} bodyNode
-	 * @param {Token} typeTok
-	 * @param {boolean} shouldAutoReturn
-	 */
-	constructor(varNameTok, argNameToks, bodyNode, typeTok, shouldAutoReturn) {
-		super();
+export default class FuncDefNode extends BaseNode {
+	public varNameTok: Token | null;
+	public argNameToks: Token[];
+	public bodyNode: BaseNode;
+	public shouldAutoReturn: boolean;
+
+	constructor(
+		varNameTok: Token | null,
+		argNameToks: Token[],
+		bodyNode: BaseNode,
+		shouldAutoReturn: boolean
+	) {
+		super(
+			varNameTok
+				? varNameTok.posStart
+				: argNameToks.length > 0
+				? argNameToks[0].posStart
+				: bodyNode.posStart,
+			bodyNode.posEnd
+		);
 
 		this.varNameTok = varNameTok;
 		this.argNameToks = argNameToks;
 		this.bodyNode = bodyNode;
-		this.typeTok = typeTok;
 		this.shouldAutoReturn = shouldAutoReturn;
-
-		if (this.varNameTok) {
-			this.posStart = this.varNameTok.posStart;
-		} else if (this.argNameToks.length > 0) {
-			this.posStart = this.argNameToks[0].posStart;
-		} else {
-			this.posStart = this.bodyNode.posStart;
-		}
-
-		this.posEnd = this.bodyNode.posEnd;
 	}
 }
-
-export default FuncDefNode;

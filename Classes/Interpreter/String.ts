@@ -1,22 +1,16 @@
 import Number from "./Number";
 import Value from "./Value";
-import List from "./List";
 import Boolean from "./Boolean";
 
-class String extends Value {
-	/**
-	 * @param {string} value
-	 */
-	constructor(value) {
+export default class String extends Value {
+	public value: string;
+
+	constructor(value: string) {
 		super();
 		this.value = value;
 	}
 
-	/**
-	 * @param {Value} other
-	 * @returns {[Value, Errors.BaseError]}
-	 */
-	addedTo(other) {
+	public addedTo(other: Value): any {
 		if (other instanceof String) {
 			return [
 				new String(this.value + other.value).setContext(this.context),
@@ -30,98 +24,56 @@ class String extends Value {
 				null,
 			];
 		} else {
-			return [null, this.illegalOperation(this.addedTo, other)];
+			return [null, this.illegalOperation(other)];
 		}
 	}
 
-	/**
-	 * @param {Value} other
-	 * @returns {[Value, Errors.BaseError]}
-	 */
-	multedBy(other) {
+	public multedBy(other: Value): any {
 		if (other instanceof Number) {
 			return [
 				new String(this.value.repeat(other.value)).setContext(this.context),
 				null,
 			];
 		} else {
-			return [null, this.illegalOperation(this.addedTo, other)];
+			return [null, this.illegalOperation(other)];
 		}
 	}
 
-	/**
-	 * @param {Value} other
-	 * @returns {[Value, Errors.BaseError]}
-	 */
-	getComparisonEq(other) {
+	public getComparisonEq(other: Value): any {
 		if (other instanceof String) {
 			return [
 				new Boolean(this.value === other.value).setContext(this.context),
 				null,
 			];
 		} else {
-			return [null, this.illegalOperation(this.addedTo, other)];
+			return [null, this.illegalOperation(other)];
 		}
 	}
 
-	/**
-	 * @param {Value} other
-	 * @returns {[Value, Errors.BaseError]}
-	 */
-	getComparisonNe(other) {
+	public getComparisonNe(other: Value): any {
 		if (other instanceof String) {
 			return [
 				new Boolean(this.value !== other.value).setContext(this.context),
 				null,
 			];
 		} else {
-			return [null, this.illegalOperation(this.addedTo, other)];
+			return [null, this.illegalOperation(other)];
 		}
 	}
 
-	/**
-	 * @param {Value} other
-	 * @returns {[Value, Errors.BaseError]}
-	 */
-	isIn(other) {
-		if (other instanceof List) {
-			let includes = !!other.elements.find(
-				(e) =>
-					this.constructor.name === e.constructor.name && this.value === e.value
-			);
-			return [new Boolean(includes), null];
-		} else if (other instanceof String) {
-			return [new Boolean(other.value.includes(this.value)), null];
-		} else if (other instanceof Object) {
-			let includes = !!other.elements.find(
-				(e) =>
-					this.constructor.name === e.elements[0].constructor.name &&
-					this.value === e.elements[0].value
-			);
-			return [new Boolean(includes), null];
-		} else {
-			return [null, this.illegalOperation(this.posStart, this.posEnd)];
-		}
-	}
-
-	isTrue() {
+	public isTrue() {
 		return this.value.length > 0;
 	}
 
-	copy() {
-		let copy = new String(this.value);
+	public copy() {
+		const copy = new String(this.value);
 		copy.setPos(this.posStart, this.posEnd);
 		copy.setContext(this.context);
+
 		return copy;
 	}
 
-	toString(tabNum) {
-		if (!tabNum) {
-			return this.value.toString();
-		} else {
-			return `'${this.value}'`.green;
-		}
+	public toString() {
+		return this.value;
 	}
 }
-
-export default String;
