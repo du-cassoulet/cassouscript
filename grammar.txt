@@ -1,0 +1,75 @@
+statements  : NEWLINE* statement (NEWLINE+ statement)* NEWLINE*
+
+statement   : KEYWORD:return expr?
+            : KEYWORD:continue
+            : KEYWORD:break
+            : expr
+
+entryExpr   : STRING DBDOT expr
+
+expr        : KEYWORD:set IDENTIFIER EQ expr
+            : comp-expr ((AND|OR) comp-expr)*
+
+comp-expr   : NOT comp-expr
+            : arith-expr ((EE|LT|GT|LTE|GTE) arith-expr)*
+
+arith-expr  : term ((PLUS|MINUS) term)*
+
+term        : factor ((MUL|DIV) factor)*
+
+factor      : (PLUS|MINUS) factor
+            : power
+
+power       : call (POW factor)*
+
+call          : atom (LPAREN (expr (COMMA expr)*)? RPAREN)?
+
+atom          : INT|FLOAT|STRING|IDENTIFIER
+              : LPAREN expr RPAREN
+              : list-expr
+              : if-expr
+              : for-expr
+              : while-expr
+              : func-expr
+
+list-expr     : LSQUARE (expr (COMMA expr)*)? RSQUARE
+
+object-expr   : LBRACKET (entryExpr (COMMA entryExpr)*)? RBRACKET
+
+if-expr       : KEYWORD:if expr ARROW
+                (statement if-expr-b|if-expr-c?)
+              | (LBRACKET statements RBRACKET|if-expr-b|if-expr-c)
+
+if-expr-b     : KEYWORD:if expr ARROW
+                (statement if-expr-b|if-expr-c?)
+              | (LBRACKET statements RBRACKET|if-expr-b|if-expr-c)
+
+if-expr-c     : KEYWORD:else ARROW
+                statement
+              | (LBRACKET statements RBRACKET)
+
+switch-expr   : KEYWORD:switch expr LBRACKET
+                case-expr* default-expr?
+              RBRACKET
+
+case-expr     : KEYWORD:case expr ARROW
+                statement
+              | (LBRACKET statements RBRACKET)
+
+default-expr  : KEYWORD:default ARROW
+                statement
+              | (LBRACKET statements RBRACKET)
+
+for-expr      : KEYWORD:for IDENTIFIER EQ expr KEYWORD:to expr
+                (KEYWORD:inc expr)? ARROW
+                expr
+              | (LBRACKET statements RBRACKET)
+
+while-expr    : KEYWORD:while expr ARROW
+                expr
+              | (LBRACKET statements RBRACKET)
+
+func-def      : KEYWORD:func IDENTIFIER?
+                LPAREN (IDENTIFIER (COMMA IDENTIFIER)*)? RPAREN
+                (ARROW expr)
+              | (LBRACKET statements RBRACKET)

@@ -1,0 +1,121 @@
+{
+	"$schema": "https://raw.githubusercontent.com/martinring/tmlanguage/master/tmlanguage.json",
+	"name": "CassouScript",
+	"patterns": [
+		{
+			"include": "#value"
+		}
+	],
+	"repository": {
+		"keywords": {
+			"patterns": [
+				{
+					"name": "keyword.control",
+					"match": "\\b(?:c(?:ontinu|as)|typ|els)e|default|return|switch|break|while|elif|each|i(?:nc|f)|for|in|to\\b"
+				}
+			]
+		},
+		"string": {
+			"patterns": [
+				{
+					"name": "string.quoted.double",
+					"begin": "\"",
+					"end": "\"",
+					"patterns": [
+						{
+							"name": "constant.character.escape",
+							"match": "\\\\."
+						}
+					]
+				},
+				{
+					"name": "string.quoted.single",
+					"begin": "'",
+					"end": "'",
+					"patterns": [
+						{
+							"name": "constant.character.escape",
+							"match": "\\\\."
+						}
+					]
+				}
+			]
+		},
+		"comments": {
+			"name": "comment.line",
+			"match": ">>.*$"
+		},
+		"constant-language": {
+			"name": "constant.language",
+			"match": "\\btrue|false|null|NaN\\b"
+		},
+		"number": {
+			"name": "constant.numeric",
+			"match": "(?<![a-zA-Z])\\.?(?:\\.?\\d)+\\b"
+		},
+		"operator": {
+			"patterns": [
+				{
+					"name": "storage.modifier",
+					"match": "(?:(?:\\+|-|\\*|\\/)?=)|(?:\\+|\\^|->?|\\*|\\/|\\||&|==)|%|(?:<|>)=?"
+				}
+			]
+		},
+		"variable": {
+			"patterns": [
+				{
+					"name": "support.function",
+					"match": "\\b\\w+(?=\\s*(?:<.+>)?\\s*\\()"
+				},
+				{
+					"name": "variable",
+					"match": "\\w+"
+				}
+			]
+		},
+		"declaration": {
+			"patterns": [
+				{
+					"name": "keyword.other",
+					"match": "\\bset|func(?=\\s)"
+				}
+			]
+		},
+		"punctutation": {
+			"name": "punctuation",
+			"match": ";|,|:|@|(?!\\d)\\."
+		},
+		"value": {
+			"patterns": [
+				{
+					"include": "#keywords"
+				},
+				{
+					"include": "#string"
+				},
+				{
+					"include": "#comments"
+				},
+				{
+					"include": "#constant-language"
+				},
+				{
+					"include": "#number"
+				},
+				{
+					"include": "#operator"
+				},
+				{
+					"include": "#declaration"
+				},
+				{
+					"include": "#variable"
+				},
+				{
+					"include": "#punctutation"
+				}
+			]
+		}
+	},
+	"scopeName": "source.csc"
+}
