@@ -19,6 +19,10 @@ export default class Token {
     this.posEnd = posEnd.copy();
   }
 
+  public hasType(...types: TokenTypes[]) {
+    return types.includes(this.type);
+  }
+
   public matches(type: TokenTypes, value: any) {
     return this.type === type && this.value === value;
   }

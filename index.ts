@@ -11,19 +11,19 @@ globalSymbolTable.set("pi", Number.pi);
 globalSymbolTable.set("log", BuiltInFunction.log);
 
 export function run(fn: string, text: string) {
-	const lexer = new Lexer(fn, text);
-	const { tokens, error } = lexer.makeToken();
-	if (error) return { value: null, error };
+  const lexer = new Lexer(fn, text);
+  const { tokens, error } = lexer.makeToken();
+  if (error) return { value: null, error };
 
-	const parser = new Parser(tokens);
-	const ast = parser.parse();
-	if (ast.error) return { value: null, error: ast.error };
+  const parser = new Parser(tokens);
+  const ast = parser.parse();
+  if (ast.error) return { value: null, error: ast.error };
 
-	const context = new Context("<program>");
-	context.symbolTable = globalSymbolTable;
+  const context = new Context("<program>");
+  context.symbolTable = globalSymbolTable;
 
-	const interpreter = new Interpreter();
-	const result = interpreter.visit(ast.node, context);
+  const interpreter = new Interpreter();
+  const result = interpreter.visit(ast.node, context);
 
-	return { value: result.value, error: result.error };
+  return { value: result.value, error: result.error };
 }

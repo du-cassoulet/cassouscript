@@ -1,6 +1,3 @@
-set obj = {
-  foo: 1 + 1,
-  bar: 3,
-};
-
-log(obj.feu);
+set i = 0;
+++i;
+log(i);
