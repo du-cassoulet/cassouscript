@@ -2,7 +2,7 @@ import fs from "fs";
 import Keywords from "../Constants/Keywords";
 import Rules from "../Constants/Rules";
 
-const NAME_REGEX = /^@name(?:\n|\s)+(?<value>[a-zA-Z][a-zA-Z0-9]*)$/;
+const NAME_REGEX = /^@name(?:\n|\s)+(?<value>[a-zA-Z0-9_-]+)$/;
 
 const VERSION_REGEX = /^@version(?:\n|\s)+(?<value>[0-9]+(?:\.[0-9]+)*)$/;
 
@@ -90,7 +90,7 @@ export default class Config {
 				return;
 			}
 
-			throw new Error("Invalid declaration");
+			throw new Error(`Invalid declaration for ${declaration}`);
 		});
 	}
 }

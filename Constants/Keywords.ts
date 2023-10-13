@@ -15,4 +15,7 @@ export default Object.freeze({
 	NULL: "null",
 	NAN: "NaN",
 	EACH: "each",
+	TYPE: "type",
+	INCLUDE: "include",
+	EXPORT: "export",
 });

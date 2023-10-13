@@ -5,6 +5,7 @@ import Position from "./Position";
 import Token from "./Token";
 import Keywords from "../Constants/Keywords";
 import type Config from "./Config";
+import Types from "../Constants/Types";
 
 export default class Lexer {
 	public fn: string;
@@ -186,7 +187,9 @@ export default class Lexer {
 			this.advance();
 		}
 
-		if (Object.values(this.config.keywords).includes(idStr)) {
+		if (Types.includes(idStr)) {
+			return new Token(TokenTypes.TYPE, idStr, posStart, this.pos);
+		} else if (Object.values(this.config.keywords).includes(idStr)) {
 			return new Token(TokenTypes.KEYWORD, idStr, posStart, this.pos);
 		} else {
 			return new Token(TokenTypes.IDENTIFIER, idStr, posStart, this.pos);

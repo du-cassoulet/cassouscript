@@ -3,9 +3,9 @@ import BaseNode from "./BaseNode";
 
 export default class VarAccessNode extends BaseNode {
 	public varNameTok: Token;
-	public keys: string[];
+	public keys: (BaseNode | string)[];
 
-	constructor(varNameTok: Token, keys: string[]) {
+	constructor(varNameTok: Token, keys: (BaseNode | string)[]) {
 		super(varNameTok.posStart, varNameTok.posEnd);
 
 		this.varNameTok = varNameTok;

@@ -1,6 +1,7 @@
 import Number from "./Number";
 import Value from "./Value";
 import Boolean from "./Boolean";
+import chalk from "chalk";
 
 export default class String extends Value {
 	public value: string;
@@ -73,7 +74,11 @@ export default class String extends Value {
 		return copy;
 	}
 
-	public toString() {
-		return this.value;
+	public toString(tabNum: number = 0) {
+		if (tabNum === 0) {
+			return this.value;
+		} else {
+			return chalk.green(`"${this.value}"`);
+		}
 	}
 }

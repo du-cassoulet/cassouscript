@@ -1,38 +1,51 @@
 import chalk from "chalk";
 import Value from "./Value";
+import BuiltInFunction from "./BuiltInFunction";
 
 export default class Dictionary extends Value {
-  public entries: { [key: string]: Value };
+	public static std = new Dictionary({
+		log: BuiltInFunction.log,
+		ask: BuiltInFunction.ask,
+	});
 
-  constructor(entries: { [key: string]: Value }) {
-    super();
-    this.entries = entries;
-  }
+	public entries: { [key: string]: any };
 
-  public isTrue() {
-    return Object.keys(this.entries).length > 0;
-  }
+	constructor(entries: { [key: string]: any }) {
+		super();
+		this.entries = entries;
+	}
 
-  public copy() {
-    const copy = new Dictionary({ ...this.entries });
-    copy.setPos(this.posStart, this.posEnd);
-    copy.setContext(this.context);
+	public isTrue() {
+		return Object.keys(this.entries).length > 0;
+	}
 
-    return copy;
-  }
+	public copy() {
+		const copy = new Dictionary({ ...this.entries });
+		copy.setPos(this.posStart, this.posEnd);
+		copy.setContext(this.context);
 
-  public toString() {
-    if (Object.keys(this.entries).length === 0) return chalk.black("{}");
+		return copy;
+	}
 
-    return (
-      chalk.black("{ ") +
-      Object.entries(this.entries)
-        .map(
-          ([key, value]) =>
-            chalk.green("'" + key + "'") + ": " + value.toString()
-        )
-        .join(chalk.black(", ")) +
-      chalk.black(" }")
-    );
-  }
+	public toString(tabNum: number = 0) {
+		if (Object.keys(this.entries).length === 0) return chalk.black("{}");
+
+		return (
+			chalk.black("{") +
+			"\n" +
+			Object.entries(this.entries)
+				.map(
+					([key, value]) =>
+						" ".repeat(tabNum + 2) +
+						key +
+						chalk.black(":") +
+						" " +
+						value.toString(tabNum + 2)
+				)
+				.join(chalk.black(",") + "\n") +
+			"\n" +
+			" ".repeat(tabNum) +
+			chalk.black("}")
+		);
+	}
 }

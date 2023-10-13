@@ -18,6 +18,7 @@ export default class BaseFunction extends Value {
 
 	public generateNewContext() {
 		const newContext = new Context(this.name, this.context, this.posStart);
+
 		newContext.symbolTable = new SymbolTable(
 			newContext.parent?.symbolTable ?? null
 		);

@@ -1,5 +1,5 @@
 {
-  "name": "interpreter",
+  "name": "cassouscript",
   "module": "index.ts",
   "type": "module",
   "devDependencies": {

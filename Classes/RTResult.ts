@@ -6,6 +6,7 @@ export default class RTResult {
 	public funcReturnValue: any = null;
 	public loopShouldContinue: boolean = false;
 	public loopShouldBreak: boolean = false;
+	public exportValue: any = null;
 
 	constructor() {
 		this.reset();
@@ -15,6 +16,7 @@ export default class RTResult {
 		this.value = null;
 		this.error = null;
 		this.funcReturnValue = null;
+		this.exportValue = null;
 		this.loopShouldContinue = false;
 		this.loopShouldBreak = false;
 	}
@@ -22,6 +24,7 @@ export default class RTResult {
 	public register(res: RTResult) {
 		this.error = res.error;
 		this.funcReturnValue = res.funcReturnValue;
+		this.exportValue = res.exportValue;
 		this.loopShouldContinue = res.loopShouldContinue;
 		this.loopShouldBreak = res.loopShouldBreak;
 
@@ -38,6 +41,13 @@ export default class RTResult {
 	public successReturn(value: any) {
 		this.reset();
 		this.funcReturnValue = value;
+
+		return this;
+	}
+
+	public successExport(value: any) {
+		this.reset();
+		this.exportValue = value;
 
 		return this;
 	}
@@ -69,5 +79,9 @@ export default class RTResult {
 			this.loopShouldContinue ||
 			this.loopShouldBreak
 		);
+	}
+
+	public shouldExport() {
+		return this.exportValue;
 	}
 }

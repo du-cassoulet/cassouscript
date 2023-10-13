@@ -1,22 +1,23 @@
-import { run } from "./index";
+import path from "path";
+import { run } from "./runner";
 
-const filePath = process.argv[2];
+export default async function load(rawPath: string) {
+	if (!rawPath) return console.log("You must specify a file path.");
 
-if (filePath) {
+	const filePath = path.join(path.dirname(import.meta.path), rawPath);
 	const file = Bun.file(filePath);
 	const exists = await file.exists();
-	if (!exists) throw new Error("File does not exist.");
+	if (!exists) return console.log("File does not exist.");
 
 	const ftxt = await file.text();
-	const path = filePath.split(/\/|\\{2}/g);
+	if (!ftxt) return;
 
-	if (ftxt) {
-		const { error } = run(path[path.length - 1], ftxt);
+	const { error } = await run(
+		path.dirname(filePath),
+		path.basename(filePath),
+		ftxt,
+		true
+	);
 
-		if (error) {
-			console.log(error.toString());
-		}
-	}
-} else {
-	console.log("You must specify a file path.");
+	if (error) console.log(error.toString());
 }

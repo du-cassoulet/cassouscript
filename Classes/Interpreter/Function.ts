@@ -1,3 +1,4 @@
+import chalk from "chalk";
 import Interpreter from "../Interpreter";
 import BaseNode from "../Nodes/BaseNode";
 import RTResult from "../RTResult";
@@ -9,30 +10,33 @@ export default class Function extends BaseFunction {
 	public bodyNode: BaseNode;
 	public argNames: string[];
 	public shouldAutoReturn: boolean;
+	public rootPath: string;
 
 	constructor(
 		name: string,
 		bodyNode: BaseNode,
 		argNames: string[],
-		shouldAutoReturn: boolean
+		shouldAutoReturn: boolean,
+		rootPath: string
 	) {
 		super(name);
 
 		this.bodyNode = bodyNode;
 		this.argNames = argNames;
 		this.shouldAutoReturn = shouldAutoReturn;
+		this.rootPath = rootPath;
 	}
 
 	// @ts-ignore
-	public execute(args: Value[]): any {
+	public async execute(args: Value[]): any {
 		const res = new RTResult();
-		const interpreter = new Interpreter();
+		const interpreter = new Interpreter(this.rootPath);
 		const execCtx = this.generateNewContext();
 
 		res.register(this.checkAndPopulateArgs(this.argNames, args, execCtx));
 		if (res.shouldReturn()) return res;
 
-		const value = res.register(interpreter.visit(this.bodyNode, execCtx));
+		const value = res.register(await interpreter.visit(this.bodyNode, execCtx));
 		if (res.shouldReturn() && res.funcReturnValue === null) return res;
 
 		const retValue =
@@ -48,7 +52,8 @@ export default class Function extends BaseFunction {
 			this.name,
 			this.bodyNode,
 			this.argNames,
-			this.shouldAutoReturn
+			this.shouldAutoReturn,
+			this.rootPath
 		);
 
 		copy.setContext(this.context);
@@ -58,6 +63,6 @@ export default class Function extends BaseFunction {
 	}
 
 	public toString() {
-		return `<function ${this.name}>`;
+		return chalk.blue(`<function ${this.name}>`);
 	}
 }

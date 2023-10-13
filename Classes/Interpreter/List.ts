@@ -54,12 +54,17 @@ export default class List extends Value {
 		return copy;
 	}
 
-	public toString() {
+	public toString(tabNum: number = 0) {
 		if (this.elements.length === 0) return chalk.black("[]");
 
 		return (
 			chalk.black("[") +
-			this.elements.map((e) => e.toString()).join(chalk.black(", ")) +
+			"\n" +
+			this.elements
+				.map((e) => " ".repeat(tabNum + 2) + e.toString(tabNum + 2))
+				.join(chalk.black(",") + "\n") +
+			"\n" +
+			" ".repeat(tabNum) +
 			chalk.black("]")
 		);
 	}

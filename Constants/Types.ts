@@ -1,12 +1,11 @@
-export default [
+export default Object.freeze([
 	"Boolean",
-	"BuiltInFunction",
 	"Function",
+	"BuiltInFunction",
+	"Dictionary",
 	"List",
 	"Number",
-	"Object",
-	"Promise",
 	"String",
 	"Type",
 	"Void",
-];
+]);

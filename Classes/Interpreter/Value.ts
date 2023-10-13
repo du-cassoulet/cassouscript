@@ -97,6 +97,10 @@ export default class Value {
 		return true;
 	}
 
+	public toString(tabIndex?: number) {
+		throw new Error(`Method undefined, TabIndex: ${tabIndex}.`);
+	}
+
 	public illegalOperation(other: Value | null = null) {
 		if (!other) other = this;
 
