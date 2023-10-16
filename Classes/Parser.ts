@@ -26,7 +26,7 @@ import BaseNode from "./Nodes/BaseNode";
 import DictionaryNode from "./Nodes/DictionaryNode";
 import TypeNode from "./Nodes/TypeNode";
 import IncludeNode from "./Nodes/IncludeNode";
-import ExportNode from "./Nodes/ExportNode";
+import WaitNode from "./Nodes/WaitNode";
 
 export default class Parser {
 	public tokens: Token[];
@@ -65,7 +65,7 @@ export default class Parser {
 				new InvalidSyntaxError(
 					this.currentTok.posStart,
 					this.currentTok.posEnd,
-					"<ERROR>"
+					"Expected '+', '-', '*', '/', '^', '==', '!=', '<', '>', '<=', '>=', '&&' or '||'"
 				)
 			);
 		}
@@ -137,20 +137,6 @@ export default class Parser {
 		}
 
 		if (
-			this.currentTok.matches(TokenTypes.KEYWORD, this.config.keywords.EXPORT)
-		) {
-			res.registerAdvancement();
-			this.advance();
-
-			const expr = res.tryRegister(this.expr());
-			if (!expr) this.reverse(res.toReverseCount);
-
-			return res.success(
-				new ExportNode(expr, posStart, this.currentTok.posStart.copy())
-			);
-		}
-
-		if (
 			this.currentTok.matches(TokenTypes.KEYWORD, this.config.keywords.CONTINUE)
 		) {
 			res.registerAdvancement();
@@ -178,7 +164,7 @@ export default class Parser {
 				new InvalidSyntaxError(
 					this.currentTok.posStart,
 					this.currentTok.posEnd,
-					"<ERROR>"
+					"Expected 'RETURN', 'CONTINUE', 'BREAK', 'IF', 'FOR', 'WHILE', 'FUNC', int, float, identifier, '+', '-', '(', '[' or '!'"
 				)
 			);
 		}
@@ -198,7 +184,7 @@ export default class Parser {
 					new InvalidSyntaxError(
 						this.currentTok.posStart,
 						this.currentTok.posEnd,
-						"<ERROR>"
+						"Expected identifier"
 					)
 				);
 			}
@@ -217,7 +203,7 @@ export default class Parser {
 					new InvalidSyntaxError(
 						this.currentTok.posStart,
 						this.currentTok.posEnd,
-						"<ERROR>"
+						"Expected '='."
 					)
 				);
 			}
@@ -234,6 +220,38 @@ export default class Parser {
 			if (res.error) return res;
 
 			return res.success(new VarAssignNode(varName, expr));
+		}
+
+		if (
+			this.currentTok.matches(TokenTypes.KEYWORD, this.config.keywords.WAITFOR)
+		) {
+			res.registerAdvancement();
+			this.advance();
+
+			while (this.currentTok.hasType(TokenTypes.NEWLINE)) {
+				res.registerAdvancement();
+				this.advance();
+			}
+
+			const promiseExpr = res.register(this.expr());
+			if (res.error) return res;
+
+			if (this.currentTok.hasType(TokenTypes.COMMA)) {
+				res.registerAdvancement();
+				this.advance();
+
+				while (this.currentTok.hasType(TokenTypes.NEWLINE)) {
+					res.registerAdvancement();
+					this.advance();
+				}
+
+				const executeExpr = res.register(this.expr());
+				if (res.error) return res;
+
+				return res.success(new WaitNode(promiseExpr, executeExpr));
+			}
+
+			return res.success(new WaitNode(promiseExpr, null));
 		}
 
 		if (
@@ -279,7 +297,7 @@ export default class Parser {
 				new InvalidSyntaxError(
 					this.currentTok.posStart,
 					this.currentTok.posEnd,
-					"<ERROR>"
+					"Expected 'SET', 'WAITFOR', 'TYPE', 'INCLUDE', 'RETURN', 'CONTINUE', 'BREAK', 'IF', 'FOR', 'WHILE', 'FUNC', int, float, identifier, '+', '-', '(', '[' or '!'"
 				)
 			);
 		}
@@ -347,7 +365,7 @@ export default class Parser {
 				new InvalidSyntaxError(
 					this.currentTok.posStart,
 					this.currentTok.posEnd,
-					"<ERROR>"
+					"Expected int, float, identifier, '+', '-', '(', '[', 'IF', 'FOR', 'WHILE', 'FUNC' or '!'"
 				)
 			);
 		}
@@ -408,7 +426,7 @@ export default class Parser {
 						new InvalidSyntaxError(
 							this.currentTok.posStart,
 							this.currentTok.posEnd,
-							"<ERROR>"
+							"Expected ')', 'SET', 'IF', 'FOR', 'WHILE', 'FUNC', int, float, identifier, '+', '-', '(', '[' or '!'"
 						)
 					);
 				}
@@ -426,7 +444,7 @@ export default class Parser {
 						new InvalidSyntaxError(
 							this.currentTok.posStart,
 							this.currentTok.posEnd,
-							"<ERROR>"
+							"Expected ',' or ')'"
 						)
 					);
 				}
@@ -494,7 +512,7 @@ export default class Parser {
 							new InvalidSyntaxError(
 								this.currentTok.posStart,
 								this.currentTok.posEnd,
-								"<ERROR>"
+								"Expected identifier"
 							)
 						);
 					}
@@ -515,7 +533,7 @@ export default class Parser {
 							new ExpectedCharError(
 								this.currentTok.posStart,
 								this.currentTok.posEnd,
-								"<ERROR>"
+								"Expected ']'"
 							)
 						);
 					}
@@ -567,7 +585,7 @@ export default class Parser {
 					new ExpectedCharError(
 						this.currentTok.posStart,
 						this.currentTok.posEnd,
-						"<ERROR>"
+						"Expected ')'"
 					)
 				);
 			}
@@ -593,7 +611,7 @@ export default class Parser {
 			new InvalidSyntaxError(
 				this.currentTok.posStart,
 				this.currentTok.posEnd,
-				"<ERROR>"
+				"Expected int, float, identifier, '+', '-', '(', '[', 'IF', 'FOR', 'WHILE', 'FUNC' or '!'"
 			)
 		);
 	}
@@ -608,7 +626,7 @@ export default class Parser {
 				new InvalidSyntaxError(
 					this.currentTok.posStart,
 					this.currentTok.posEnd,
-					"<ERROR>"
+					"Expected '['"
 				)
 			);
 		}
@@ -631,7 +649,7 @@ export default class Parser {
 					new InvalidSyntaxError(
 						this.currentTok.posStart,
 						this.currentTok.posEnd,
-						"<ERROR>"
+						"Expected ']', 'SET', 'IF', 'FOR', 'WHILE', 'FUNC', int, float, identifier, '+', '-', '(', '[' or '!'"
 					)
 				);
 			}
@@ -659,7 +677,7 @@ export default class Parser {
 					new InvalidSyntaxError(
 						this.currentTok.posStart,
 						this.currentTok.posEnd,
-						"<ERROR>"
+						"Expected ',' or ']'"
 					)
 				);
 			}
@@ -683,7 +701,7 @@ export default class Parser {
 				new InvalidSyntaxError(
 					this.currentTok.posStart,
 					this.currentTok.posEnd,
-					"<ERROR>"
+					"Expected '{'"
 				)
 			);
 		}
@@ -711,7 +729,7 @@ export default class Parser {
 						new InvalidSyntaxError(
 							this.currentTok.posStart,
 							this.currentTok.posEnd,
-							"<ERROR>"
+							"Expected ']'"
 						)
 					);
 				}
@@ -725,7 +743,7 @@ export default class Parser {
 					new InvalidSyntaxError(
 						this.currentTok.posStart,
 						this.currentTok.posEnd,
-						"<ERROR>"
+						"Expected ':'"
 					)
 				);
 			}
@@ -760,7 +778,7 @@ export default class Parser {
 				new InvalidSyntaxError(
 					this.currentTok.posStart,
 					this.currentTok.posEnd,
-					"<ERROR>"
+					"Expected ',' or '}'"
 				)
 			);
 		}
@@ -781,7 +799,7 @@ export default class Parser {
 				new InvalidSyntaxError(
 					this.currentTok.posStart,
 					this.currentTok.posEnd,
-					"<ERROR>"
+					"Expected 'IF'"
 				)
 			);
 		}
@@ -816,7 +834,7 @@ export default class Parser {
 					new InvalidSyntaxError(
 						this.currentTok.posStart,
 						this.currentTok.posEnd,
-						"<ERROR>"
+						"Expected '}'"
 					)
 				);
 			}
@@ -831,7 +849,7 @@ export default class Parser {
 				new InvalidSyntaxError(
 					this.currentTok.posStart,
 					this.currentTok.posEnd,
-					"<ERROR>"
+					"Expected '{' or '->'"
 				)
 			);
 		}
@@ -863,7 +881,7 @@ export default class Parser {
 						new InvalidSyntaxError(
 							this.currentTok.posStart,
 							this.currentTok.posEnd,
-							"<ERROR>"
+							"Expected '}'"
 						)
 					);
 				}
@@ -878,7 +896,7 @@ export default class Parser {
 					new InvalidSyntaxError(
 						this.currentTok.posStart,
 						this.currentTok.posEnd,
-						"<ERROR>"
+						"Expected '{' or '->'"
 					)
 				);
 			}
@@ -899,7 +917,7 @@ export default class Parser {
 				new InvalidSyntaxError(
 					this.currentTok.posStart,
 					this.currentTok.posEnd,
-					"<ERROR>"
+					"Expected 'FOR'"
 				)
 			);
 		}
@@ -912,7 +930,7 @@ export default class Parser {
 				new InvalidSyntaxError(
 					this.currentTok.posStart,
 					this.currentTok.posEnd,
-					"<ERROR>"
+					"Expected identifier"
 				)
 			);
 		}
@@ -926,7 +944,7 @@ export default class Parser {
 				new InvalidSyntaxError(
 					this.currentTok.posStart,
 					this.currentTok.posEnd,
-					"<ERROR>"
+					"Expected '='"
 				)
 			);
 		}
@@ -973,7 +991,7 @@ export default class Parser {
 						new InvalidSyntaxError(
 							this.currentTok.posStart,
 							this.currentTok.posEnd,
-							"<ERROR>"
+							"Expected ']'"
 						)
 					);
 				}
@@ -994,7 +1012,7 @@ export default class Parser {
 					new InvalidSyntaxError(
 						this.currentTok.posStart,
 						this.currentTok.posEnd,
-						"<ERROR>"
+						"Expected 'TO'"
 					)
 				);
 			}
@@ -1048,7 +1066,7 @@ export default class Parser {
 						new InvalidSyntaxError(
 							this.currentTok.posStart,
 							this.currentTok.posEnd,
-							"<ERROR>"
+							"Expected ']'"
 						)
 					);
 				}
@@ -1066,7 +1084,7 @@ export default class Parser {
 			new InvalidSyntaxError(
 				this.currentTok.posStart,
 				this.currentTok.posEnd,
-				"<ERROR>"
+				"Expected '->' or '['"
 			)
 		);
 	}
@@ -1081,7 +1099,7 @@ export default class Parser {
 				new InvalidSyntaxError(
 					this.currentTok.posStart,
 					this.currentTok.posEnd,
-					"<ERROR>"
+					"Expected 'WHILE'"
 				)
 			);
 		}
@@ -1128,7 +1146,7 @@ export default class Parser {
 					new InvalidSyntaxError(
 						this.currentTok.posStart,
 						this.currentTok.posEnd,
-						"<ERROR>"
+						"Expected '}'"
 					)
 				);
 			}
@@ -1142,7 +1160,7 @@ export default class Parser {
 				new InvalidSyntaxError(
 					this.currentTok.posStart,
 					this.currentTok.posEnd,
-					"<ERROR>"
+					"Expected '->' or '{'"
 				)
 			);
 		}
@@ -1158,7 +1176,7 @@ export default class Parser {
 				new InvalidSyntaxError(
 					this.currentTok.posStart,
 					this.currentTok.posEnd,
-					"<ERROR>"
+					"Expected 'FUNC'"
 				)
 			);
 		}
@@ -1177,7 +1195,7 @@ export default class Parser {
 					new InvalidSyntaxError(
 						this.currentTok.posStart,
 						this.currentTok.posEnd,
-						"<ERROR>"
+						"Expected '('"
 					)
 				);
 			}
@@ -1201,7 +1219,7 @@ export default class Parser {
 						new InvalidSyntaxError(
 							this.currentTok.posStart,
 							this.currentTok.posEnd,
-							"<ERROR>"
+							"Expected identifier"
 						)
 					);
 				}
@@ -1216,7 +1234,7 @@ export default class Parser {
 					new InvalidSyntaxError(
 						this.currentTok.posStart,
 						this.currentTok.posEnd,
-						"<ERROR>"
+						"Expected ',' or ')'"
 					)
 				);
 			}
@@ -1226,7 +1244,7 @@ export default class Parser {
 					new InvalidSyntaxError(
 						this.currentTok.posStart,
 						this.currentTok.posEnd,
-						"<ERROR>"
+						"Expected identifier or ')'"
 					)
 				);
 			}
@@ -1257,7 +1275,7 @@ export default class Parser {
 					new InvalidSyntaxError(
 						this.currentTok.posStart,
 						this.currentTok.posEnd,
-						"<ERROR>"
+						"Expected '}'"
 					)
 				);
 			}
@@ -1271,7 +1289,7 @@ export default class Parser {
 				new InvalidSyntaxError(
 					this.currentTok.posStart,
 					this.currentTok.posEnd,
-					"<ERROR>"
+					"Expected '->' or '{'"
 				)
 			);
 		}

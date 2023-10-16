@@ -2,11 +2,10 @@ import Error from "./Errors";
 
 export default class RTResult {
 	public value: any = null;
-	public error: Error | null = null;
+	public error: Error | string | null = null;
 	public funcReturnValue: any = null;
 	public loopShouldContinue: boolean = false;
 	public loopShouldBreak: boolean = false;
-	public exportValue: any = null;
 
 	constructor() {
 		this.reset();
@@ -16,7 +15,6 @@ export default class RTResult {
 		this.value = null;
 		this.error = null;
 		this.funcReturnValue = null;
-		this.exportValue = null;
 		this.loopShouldContinue = false;
 		this.loopShouldBreak = false;
 	}
@@ -24,7 +22,6 @@ export default class RTResult {
 	public register(res: RTResult) {
 		this.error = res.error;
 		this.funcReturnValue = res.funcReturnValue;
-		this.exportValue = res.exportValue;
 		this.loopShouldContinue = res.loopShouldContinue;
 		this.loopShouldBreak = res.loopShouldBreak;
 
@@ -45,13 +42,6 @@ export default class RTResult {
 		return this;
 	}
 
-	public successExport(value: any) {
-		this.reset();
-		this.exportValue = value;
-
-		return this;
-	}
-
 	public successContinue() {
 		this.reset();
 		this.loopShouldContinue = true;
@@ -65,7 +55,7 @@ export default class RTResult {
 		return this;
 	}
 
-	public failure(error: Error) {
+	public failure(error: Error | string) {
 		this.reset();
 		this.error = error;
 
@@ -79,9 +69,5 @@ export default class RTResult {
 			this.loopShouldContinue ||
 			this.loopShouldBreak
 		);
-	}
-
-	public shouldExport() {
-		return this.exportValue;
 	}
 }

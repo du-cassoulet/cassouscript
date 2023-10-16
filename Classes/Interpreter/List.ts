@@ -32,7 +32,7 @@ export default class List extends Value {
 					new RTError(
 						<Position>other.posStart,
 						<Position>other.posEnd,
-						"<ERROR>",
+						"Index out of range",
 						<Context>this.context
 					),
 				];

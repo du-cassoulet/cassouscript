@@ -8,6 +8,8 @@ const VERSION_REGEX = /^@version(?:\n|\s)+(?<value>[0-9]+(?:\.[0-9]+)*)$/;
 
 const DESCRIPTION_REGEX = /^@description(?:\n|\s)+(?<value>.+)$/;
 
+const ENV_REGEX = /^@env(?:\n|\s)+(?<name>[A-Z_]+)(?:\n|\s)*(?<value>.+)$/;
+
 const KEYWORD_REGEX =
 	/^@keyword(?:\n|\s)+(?<name>[A-Z]+)(?:\n|\s)*(?<value>[a-zA-Z][a-zA-Z0-9]*)$/;
 
@@ -25,12 +27,16 @@ export default class Config {
 
 	public keywords: { [key: string]: string };
 	public rules: { [key: string]: boolean };
+	public env: { [key: string]: string };
 	public package: Package = {};
+	public error: string | null;
 
 	constructor(path: string) {
 		this.path = path;
 		this.keywords = { ...Keywords };
 		this.rules = { ...Rules };
+		this.env = {};
+		this.error = null;
 
 		this.load();
 	}
@@ -39,7 +45,8 @@ export default class Config {
 		const raw = fs.readFileSync(this.path, "utf-8");
 		const declarations = raw.split(/(?<!\\);+/g);
 
-		declarations.forEach((rawDeclaration) => {
+		declarations.forEach((rawDeclaration, index) => {
+			if (this.error) return;
 			const declaration = rawDeclaration.trim();
 			if (!declaration) return;
 
@@ -70,6 +77,16 @@ export default class Config {
 				return;
 			}
 
+			if (ENV_REGEX.test(declaration)) {
+				const match = declaration.match(ENV_REGEX);
+				const name = match?.groups?.name?.trim();
+				const value = match?.groups?.value?.trim();
+				if (!name || !value) throw new Error("Invalid declaration");
+
+				this.env[name] = value;
+				return;
+			}
+
 			if (KEYWORD_REGEX.test(declaration)) {
 				const match = declaration.match(KEYWORD_REGEX);
 				const name = match?.groups?.name?.trim();
@@ -90,7 +107,7 @@ export default class Config {
 				return;
 			}
 
-			throw new Error(`Invalid declaration for ${declaration}`);
+			this.error = `Invalid declaration (nb.${index + 1}): "${declaration};"`;
 		});
 	}
 }

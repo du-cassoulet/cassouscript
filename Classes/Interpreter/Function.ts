@@ -5,19 +5,22 @@ import RTResult from "../RTResult";
 import BaseFunction from "./BaseFunction";
 import Value from "./Value";
 import Void from "./Void";
+import Config from "../Config";
 
 export default class Function extends BaseFunction {
 	public bodyNode: BaseNode;
 	public argNames: string[];
 	public shouldAutoReturn: boolean;
 	public rootPath: string;
+	public config: Config;
 
 	constructor(
 		name: string,
 		bodyNode: BaseNode,
 		argNames: string[],
 		shouldAutoReturn: boolean,
-		rootPath: string
+		rootPath: string,
+		config: Config
 	) {
 		super(name);
 
@@ -25,12 +28,13 @@ export default class Function extends BaseFunction {
 		this.argNames = argNames;
 		this.shouldAutoReturn = shouldAutoReturn;
 		this.rootPath = rootPath;
+		this.config = config;
 	}
 
 	// @ts-ignore
 	public async execute(args: Value[]): any {
 		const res = new RTResult();
-		const interpreter = new Interpreter(this.rootPath);
+		const interpreter = new Interpreter(this.rootPath, this.config);
 		const execCtx = this.generateNewContext();
 
 		res.register(this.checkAndPopulateArgs(this.argNames, args, execCtx));
@@ -53,7 +57,8 @@ export default class Function extends BaseFunction {
 			this.bodyNode,
 			this.argNames,
 			this.shouldAutoReturn,
-			this.rootPath
+			this.rootPath,
+			this.config
 		);
 
 		copy.setContext(this.context);

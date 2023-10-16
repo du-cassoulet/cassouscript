@@ -59,7 +59,7 @@ export default async function init(options: string[]) {
 			`@name ${name};\n@version ${version};`,
 			"utf-8"
 		);
-
-		return console.log(chalk.green("\u2713") + " Config file created.");
 	}
+
+	return console.log(chalk.green("\u2714 ") + "Config file created.");
 }

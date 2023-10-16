@@ -1,4 +1,4 @@
-import { getattr } from "../../utils";
+import { getattr, nodesToJSON } from "../../utils";
 import RTResult from "../RTResult";
 import BaseFunction from "./BaseFunction";
 import Void from "./Void";
@@ -8,19 +8,60 @@ import { TypingError } from "../Errors";
 import Position from "../Position";
 import String from "./String";
 import chalk from "chalk";
+import Number from "./Number";
+import List from "./List";
+import fs from "fs";
+import Boolean from "./Boolean";
+import Promise from "./Waitable";
+import { JSONToNodes } from "../../utils";
 
 export default class BuiltInFunction extends BaseFunction {
 	public static log = new BuiltInFunction("log");
 	public static ask = new BuiltInFunction("ask");
+	public static sqrt = new BuiltInFunction("sqrt");
+	public static upper_text = new BuiltInFunction("upper_text");
+	public static lower_text = new BuiltInFunction("lower_text");
+	public static cap_text = new BuiltInFunction("cap_text");
+	public static floor_math = new BuiltInFunction("floor_math");
+	public static ceil_math = new BuiltInFunction("ceil_math");
+	public static round_math = new BuiltInFunction("round_math");
+	public static seed_random = new BuiltInFunction("seed_random");
+	public static pick_random = new BuiltInFunction("pick_random");
+	public static trim_text = new BuiltInFunction("trim_text");
+	public static create_file = new BuiltInFunction("create_file");
+	public static write_file = new BuiltInFunction("write_file");
+	public static delete_file = new BuiltInFunction("delete_file");
+	public static exists_file = new BuiltInFunction("exists_file");
+	public static get_request = new BuiltInFunction("get_request");
+	public static post_request = new BuiltInFunction("post_request");
+	public static put_request = new BuiltInFunction("put_request");
+	public static patch_request = new BuiltInFunction("patch_request");
+	public static delete_request = new BuiltInFunction("delete_request");
 
-	public args_log: string[];
-	public args_ask: string[];
+	public args_log = ["value"];
+	public args_ask = ["value"];
+	public args_sqrt = ["value"];
+	public args_upper_text = ["value"];
+	public args_lower_text = ["value"];
+	public args_cap_text = ["value"];
+	public args_floor_math = ["value"];
+	public args_ceil_math = ["value"];
+	public args_round_math = ["value"];
+	public args_seed_random = [];
+	public args_pick_random = ["list"];
+	public args_trim_text = ["value"];
+	public args_create_file = ["path"];
+	public args_write_file = ["path", "content"];
+	public args_delete_file = ["path"];
+	public args_exists_file = ["path"];
+	public args_get_request = ["url"];
+	public args_post_request = ["url", "body"];
+	public args_put_request = ["url", "body"];
+	public args_patch_request = ["url", "body"];
+	public args_delete_request = ["url"];
 
 	constructor(name: string) {
 		super(name);
-
-		this.args_log = ["value"];
-		this.args_ask = ["value"];
 	}
 
 	// @ts-ignore
@@ -71,7 +112,7 @@ export default class BuiltInFunction extends BaseFunction {
 				new TypingError(
 					<Position>this.posStart,
 					<Position>this.posEnd,
-					`'ask' function can only work with strings, not ${value?.type}`
+					"The value should be a string"
 				)
 			);
 		}
@@ -84,5 +125,477 @@ export default class BuiltInFunction extends BaseFunction {
 		}
 
 		return res.success(new String(response));
+	}
+
+	public execute_sqrt(execCtx: Context) {
+		const res = new RTResult();
+		const value = execCtx.symbolTable?.get("value");
+
+		if (!(value instanceof Number)) {
+			return res.failure(
+				new TypingError(
+					<Position>this.posStart,
+					<Position>this.posEnd,
+					"The value should be a number"
+				)
+			);
+		}
+
+		return res.success(new Number(Math.sqrt(value.value)));
+	}
+
+	public execute_upper_text(execCtx: Context) {
+		const res = new RTResult();
+		const value = execCtx.symbolTable?.get("value");
+
+		if (!(value instanceof String)) {
+			return res.failure(
+				new TypingError(
+					<Position>this.posStart,
+					<Position>this.posEnd,
+					"The value should be a string"
+				)
+			);
+		}
+
+		return res.success(new String(value.value.toUpperCase()));
+	}
+
+	public execute_lower_text(execCtx: Context) {
+		const res = new RTResult();
+		const value = execCtx.symbolTable?.get("value");
+
+		if (!(value instanceof String)) {
+			return res.failure(
+				new TypingError(
+					<Position>this.posStart,
+					<Position>this.posEnd,
+					"The value should be a string"
+				)
+			);
+		}
+
+		return res.success(new String(value.value.toLowerCase()));
+	}
+
+	public execute_cap_text(execCtx: Context) {
+		const res = new RTResult();
+		const value = execCtx.symbolTable?.get("value");
+
+		if (!(value instanceof String)) {
+			return res.failure(
+				new TypingError(
+					<Position>this.posStart,
+					<Position>this.posEnd,
+					"The value should be a string"
+				)
+			);
+		}
+
+		return res.success(
+			new String(
+				value.value.replace(/(?:^|[.?!]\s+)\w/g, (c) => c.toUpperCase())
+			)
+		);
+	}
+
+	public execute_floor_math(execCtx: Context) {
+		const res = new RTResult();
+		const value = execCtx.symbolTable?.get("value");
+
+		if (!(value instanceof Number)) {
+			return res.failure(
+				new TypingError(
+					<Position>this.posStart,
+					<Position>this.posEnd,
+					"The value should be a number"
+				)
+			);
+		}
+
+		return res.success(new Number(Math.floor(value.value)));
+	}
+
+	public execute_ceil_math(execCtx: Context) {
+		const res = new RTResult();
+		const value = execCtx.symbolTable?.get("value");
+
+		if (!(value instanceof Number)) {
+			return res.failure(
+				new TypingError(
+					<Position>this.posStart,
+					<Position>this.posEnd,
+					"The value should be a number"
+				)
+			);
+		}
+
+		return res.success(new Number(Math.ceil(value.value)));
+	}
+
+	public execute_round_math(execCtx: Context) {
+		const res = new RTResult();
+		const value = execCtx.symbolTable?.get("value");
+
+		if (!(value instanceof Number)) {
+			return res.failure(
+				new TypingError(
+					<Position>this.posStart,
+					<Position>this.posEnd,
+					"The value should be a number"
+				)
+			);
+		}
+
+		return res.success(new Number(Math.round(value.value)));
+	}
+
+	public execute_seed_random() {
+		return new RTResult().success(new Number(Math.random()));
+	}
+
+	public execute_pick_random(execCtx: Context) {
+		const res = new RTResult();
+		const list = execCtx.symbolTable?.get("list");
+
+		if (!(list instanceof List)) {
+			return res.failure(
+				new TypingError(
+					<Position>this.posStart,
+					<Position>this.posEnd,
+					"The list should be a list"
+				)
+			);
+		}
+
+		return res.success(
+			list.elements[Math.floor(Math.random() * list.elements.length)]
+		);
+	}
+
+	public execute_trim_text(execCtx: Context) {
+		const res = new RTResult();
+		const value = execCtx.symbolTable?.get("value");
+
+		if (!(value instanceof String)) {
+			return res.failure(
+				new TypingError(
+					<Position>this.posStart,
+					<Position>this.posEnd,
+					"The value should be a string"
+				)
+			);
+		}
+
+		return res.success(new String(value.value.trim()));
+	}
+
+	public execute_create_file(execCtx: Context) {
+		const res = new RTResult();
+		const path = execCtx.symbolTable?.get("path");
+
+		if (!(path instanceof String)) {
+			return res.failure(
+				new TypingError(
+					<Position>this.posStart,
+					<Position>this.posEnd,
+					"The path should be a string"
+				)
+			);
+		}
+
+		fs.appendFileSync(path.value, "");
+
+		return res.success(new Void(null));
+	}
+
+	public execute_write_file(execCtx: Context) {
+		const res = new RTResult();
+		const path = execCtx.symbolTable?.get("path");
+		const content = execCtx.symbolTable?.get("content");
+
+		if (!(path instanceof String)) {
+			return res.failure(
+				new TypingError(
+					<Position>this.posStart,
+					<Position>this.posEnd,
+					"The path should be a string"
+				)
+			);
+		}
+
+		if (!(content instanceof String)) {
+			return res.failure(
+				new TypingError(
+					<Position>this.posStart,
+					<Position>this.posEnd,
+					"The content should be a string"
+				)
+			);
+		}
+
+		if (!fs.existsSync(path.value)) {
+			return res.failure(
+				new TypingError(
+					<Position>this.posStart,
+					<Position>this.posEnd,
+					`No file found at path '${path.value}'`
+				)
+			);
+		}
+
+		fs.writeFileSync(path.value, content.value);
+
+		return res.success(new Void(null));
+	}
+
+	public execute_delete_file(execCtx: Context) {
+		const res = new RTResult();
+		const path = execCtx.symbolTable?.get("path");
+
+		if (!(path instanceof String)) {
+			return res.failure(
+				new TypingError(
+					<Position>this.posStart,
+					<Position>this.posEnd,
+					"The path should be a string"
+				)
+			);
+		}
+
+		if (!fs.existsSync(path.value)) {
+			return res.failure(
+				new TypingError(
+					<Position>this.posStart,
+					<Position>this.posEnd,
+					`No file found at path '${path.value}'`
+				)
+			);
+		}
+
+		fs.unlinkSync(path.value);
+
+		return res.success(new Void(null));
+	}
+
+	public execute_exists_file(execCtx: Context) {
+		const res = new RTResult();
+		const path = execCtx.symbolTable?.get("path");
+
+		if (!(path instanceof String)) {
+			return res.failure(
+				new TypingError(
+					<Position>this.posStart,
+					<Position>this.posEnd,
+					"The path should be a string"
+				)
+			);
+		}
+
+		return res.success(new Boolean(fs.existsSync(path.value)));
+	}
+
+	public execute_get_request(execCtx: Context) {
+		const res = new RTResult();
+		const url = execCtx.symbolTable?.get("url");
+
+		if (!(url instanceof String)) {
+			return res.failure(
+				new TypingError(
+					<Position>this.posStart,
+					<Position>this.posEnd,
+					"The url should be a string"
+				)
+			);
+		}
+
+		return res.success(
+			new Promise(
+				(async () => {
+					let content = null;
+					const response = await fetch(url.value, { method: "GET" });
+
+					if (
+						response.headers.get("content-type")?.includes("application/json")
+					) {
+						content = await response.json();
+					} else {
+						content = await response.text();
+					}
+
+					return JSONToNodes({
+						status: response.status,
+						url: response.url,
+						data: content,
+					});
+				})()
+			)
+		);
+	}
+
+	public execute_post_request(execCtx: Context) {
+		const res = new RTResult();
+		const url = execCtx.symbolTable?.get("url");
+		const body = execCtx.symbolTable?.get("body");
+
+		if (!(url instanceof String)) {
+			return res.failure(
+				new TypingError(
+					<Position>this.posStart,
+					<Position>this.posEnd,
+					"The url should be a string"
+				)
+			);
+		}
+
+		return res.success(
+			new Promise(
+				(async () => {
+					let content = null;
+					const response = await fetch(url.value, {
+						method: "POST",
+						body: nodesToJSON(body),
+					});
+
+					if (
+						response.headers.get("content-type")?.includes("application/json")
+					) {
+						content = await response.json();
+					} else {
+						content = await response.text();
+					}
+
+					return JSONToNodes({
+						status: response.status,
+						url: response.url,
+						data: content,
+					});
+				})()
+			)
+		);
+	}
+
+	public execute_delete_request(execCtx: Context) {
+		const res = new RTResult();
+		const url = execCtx.symbolTable?.get("url");
+
+		if (!(url instanceof String)) {
+			return res.failure(
+				new TypingError(
+					<Position>this.posStart,
+					<Position>this.posEnd,
+					"The url should be a string"
+				)
+			);
+		}
+
+		return res.success(
+			new Promise(
+				(async () => {
+					let content = null;
+					const response = await fetch(url.value, {
+						method: "DELETE",
+					});
+
+					if (
+						response.headers.get("content-type")?.includes("application/json")
+					) {
+						content = await response.json();
+					} else {
+						content = await response.text();
+					}
+
+					return JSONToNodes({
+						status: response.status,
+						url: response.url,
+						data: content,
+					});
+				})()
+			)
+		);
+	}
+
+	public execute_put_request(execCtx: Context) {
+		const res = new RTResult();
+		const url = execCtx.symbolTable?.get("url");
+		const body = execCtx.symbolTable?.get("body");
+
+		if (!(url instanceof String)) {
+			return res.failure(
+				new TypingError(
+					<Position>this.posStart,
+					<Position>this.posEnd,
+					"The url should be a string"
+				)
+			);
+		}
+
+		return res.success(
+			new Promise(
+				(async () => {
+					let content = null;
+					const response = await fetch(url.value, {
+						method: "PUT",
+						body: nodesToJSON(body),
+					});
+
+					if (
+						response.headers.get("content-type")?.includes("application/json")
+					) {
+						content = await response.json();
+					} else {
+						content = await response.text();
+					}
+
+					return JSONToNodes({
+						status: response.status,
+						url: response.url,
+						data: content,
+					});
+				})()
+			)
+		);
+	}
+
+	public execute_patch_request(execCtx: Context) {
+		const res = new RTResult();
+		const url = execCtx.symbolTable?.get("url");
+		const body = execCtx.symbolTable?.get("body");
+
+		if (!(url instanceof String)) {
+			return res.failure(
+				new TypingError(
+					<Position>this.posStart,
+					<Position>this.posEnd,
+					"The url should be a string"
+				)
+			);
+		}
+
+		return res.success(
+			new Promise(
+				(async () => {
+					let content = null;
+					const response = await fetch(url.value, {
+						method: "PATCH",
+						body: nodesToJSON(body),
+					});
+
+					if (
+						response.headers.get("content-type")?.includes("application/json")
+					) {
+						content = await response.json();
+					} else {
+						content = await response.text();
+					}
+
+					return JSONToNodes({
+						status: response.status,
+						url: response.url,
+						data: content,
+					});
+				})()
+			)
+		);
 	}
 }

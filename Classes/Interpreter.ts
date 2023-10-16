@@ -1,7 +1,6 @@
 import path from "path";
 import { getattr } from "../utils";
 import { RTError } from "./Errors";
-import { run } from "../runner";
 import TokenTypes from "../Constants/TokenTypes";
 import RTResult from "./RTResult";
 import Number from "./Interpreter/Number";
@@ -35,13 +34,25 @@ import Value from "./Interpreter/Value";
 import Type from "./Interpreter/Type";
 import TypeNode from "./Nodes/TypeNode";
 import IncludeNode from "./Nodes/IncludeNode";
-import ExportNode from "./Nodes/ExportNode";
+import Math from "./Libraries/Math";
+import Text from "./Libraries/Text";
+import Random from "./Libraries/Random";
+import File from "./Libraries/File";
+import Request from "./Libraries/Request";
+import WaitNode from "./Nodes/WaitNode";
+import Waitable from "./Interpreter/Waitable";
+import BuiltInFunction from "./Interpreter/BuiltInFunction";
+import Lexer from "./Lexer";
+import Config from "./Config";
+import Parser from "./Parser";
 
 export default class Interpreter {
 	public rootPath: string;
+	public config: Config;
 
-	constructor(rootPath: string) {
+	constructor(rootPath: string, config: Config) {
 		this.rootPath = rootPath;
+		this.config = config;
 	}
 
 	public async visit(node: BaseNode, context: Context): Promise<RTResult> {
@@ -86,7 +97,6 @@ export default class Interpreter {
 
 		for (const elementNode of node.elementNodes) {
 			elements.push(res.register(await this.visit(elementNode, context)));
-			if (res.shouldExport()) return res.exportValue;
 			if (res.shouldReturn()) return res;
 		}
 
@@ -132,7 +142,12 @@ export default class Interpreter {
 
 		if (!value) {
 			return res.failure(
-				new RTError(node.posStart, node.posEnd, "<ERROR>", context)
+				new RTError(
+					node.posStart,
+					node.posEnd,
+					`The variable '${varName}' is not defined`,
+					context
+				)
 			);
 		}
 
@@ -163,7 +178,12 @@ export default class Interpreter {
 				}
 			} else {
 				return res.failure(
-					new RTError(node.posStart, node.posEnd, "<ERROR>", context)
+					new RTError(
+						node.posStart,
+						node.posEnd,
+						`'${key}' is not defined in the variable '${varName}'`,
+						context
+					)
 				);
 			}
 		}
@@ -207,7 +227,12 @@ export default class Interpreter {
 							value = value.entries[<string>key];
 						} else {
 							return res.failure(
-								new RTError(node.posStart, node.posEnd, "<ERROR>", context)
+								new RTError(
+									node.posStart,
+									node.posEnd,
+									`'${key}' is undefined in the variable '${varName}'`,
+									context
+								)
 							);
 						}
 					} else {
@@ -250,7 +275,12 @@ export default class Interpreter {
 							value = value.elements[<number>(<unknown>key)];
 						} else {
 							return res.failure(
-								new RTError(node.posStart, node.posEnd, "<ERROR>", context)
+								new RTError(
+									node.posStart,
+									node.posEnd,
+									"Index out of range",
+									context
+								)
 							);
 						}
 					} else {
@@ -289,7 +319,12 @@ export default class Interpreter {
 					}
 				} else {
 					return res.failure(
-						new RTError(node.posStart, node.posEnd, "<ERROR>", context)
+						new RTError(
+							node.posStart,
+							node.posEnd,
+							`The variable '${varName}' is not defined`,
+							context
+						)
 					);
 				}
 			}
@@ -558,7 +593,8 @@ export default class Interpreter {
 			bodyNode,
 			argNames,
 			node.shouldAutoReturn,
-			this.rootPath
+			this.rootPath,
+			this.config
 		)
 			.setContext(context)
 			.setPos(node.posStart, node.posEnd);
@@ -576,6 +612,23 @@ export default class Interpreter {
 
 		let valueToCall = res.register(await this.visit(node.nodeToCall, context));
 		if (res.shouldReturn()) return res;
+
+		if (
+			!(
+				valueToCall instanceof Function ||
+				valueToCall instanceof BuiltInFunction
+			)
+		) {
+			return res.failure(
+				new RTError(
+					node.posStart,
+					node.posEnd,
+					`'${valueToCall}' is not a function`,
+					context
+				)
+			);
+		}
+
 		valueToCall = valueToCall.copy().setPos(node.posStart, node.posEnd);
 
 		for (const argNode of node.argNodes) {
@@ -632,16 +685,46 @@ export default class Interpreter {
 		}
 	}
 
-	public async visit_ExportNode(node: ExportNode, context: Context) {
+	public async visit_WaitNode(node: WaitNode, context: Context) {
 		const res = new RTResult();
 
-		if (!node.nodeToExport) {
+		const waitable = res.register(await this.visit(node.waitableNode, context));
+		if (res.shouldReturn()) return res;
+
+		if (!(waitable instanceof Waitable)) {
 			return res.failure(
-				new RTError(node.posStart, node.posEnd, "<ERROR>", context)
+				new RTError(
+					node.posStart,
+					node.posEnd,
+					`'${waitable}' should be a waitable`,
+					context
+				)
 			);
 		}
 
-		return res.successExport(await this.visit(node.nodeToExport, context));
+		if (node.executeNode) {
+			const value = res.register(await this.visit(node.executeNode, context));
+			if (res.shouldReturn()) return res;
+
+			if (!(value instanceof Function || value instanceof BuiltInFunction)) {
+				return res.failure(
+					new RTError(
+						node.posStart,
+						node.posEnd,
+						`'${value}' should be a function`,
+						context
+					)
+				);
+			}
+
+			waitable.value.then((resolved: any) => {
+				value.execute([resolved]);
+			});
+
+			return res.success(new Void(null));
+		} else {
+			return res.success(await waitable.value);
+		}
 	}
 
 	public async visit_IncludeNode(node: IncludeNode, context: Context) {
@@ -649,35 +732,66 @@ export default class Interpreter {
 		const rawPath: String = res.register(
 			await this.visit(node.pathNode, context)
 		);
+		if (rawPath.value.startsWith(".")) {
+			const filePath = path.join(this.rootPath, rawPath.value);
+			const file = Bun.file(filePath);
+			const exists = await file.exists();
 
-		const filePath = path.join(this.rootPath, rawPath.value);
-		const file = Bun.file(filePath);
-		const exists = await file.exists();
+			if (!exists) {
+				return res.failure(
+					new RTError(
+						node.posStart,
+						node.posEnd,
+						`The file '${filePath}' does not exist`,
+						context
+					)
+				);
+			}
 
-		if (!exists) {
-			return res.failure(
-				new RTError(node.posStart, node.posEnd, "<ERROR>", context)
-			);
-		}
+			const ftxt = await file.text();
+			if (!ftxt) return res.success(new Void(null));
 
-		const ftxt = await file.text();
-		if (!ftxt) {
+			const rp = path.dirname(filePath);
+			const fn = path.basename(filePath);
+			const lexer = new Lexer(fn, ftxt, this.config);
+
+			const { tokens, error } = lexer.makeToken();
+			if (error) return res.failure(error);
+
+			const parser = new Parser(tokens, this.config);
+			const ast = parser.parse();
+			if (ast.error) return res.failure(ast.error);
+
+			const interpreter = new Interpreter(rp, this.config);
+			res.register(await interpreter.visit(ast.node, context));
+			if (res.shouldReturn() && res.funcReturnValue === null) return res;
+
+			return res.success(res.funcReturnValue || new Void(null));
+		} else {
+			const libraries: { [key: string]: any } = Object.freeze({
+				math: Math,
+				text: Text,
+				random: Random,
+				file: File,
+				request: Request,
+			});
+
+			if (!(rawPath.value in libraries)) {
+				return res.failure(
+					new RTError(
+						node.posStart,
+						node.posEnd,
+						`The library '${rawPath.value}' is undefined`,
+						context
+					)
+				);
+			}
+
 			return res.success(
-				new Void(null).setContext(context).setPos(node.posStart, node.posEnd)
+				libraries[rawPath.value]
+					.setPos(node.posStart, node.posEnd)
+					.setContext(context)
 			);
 		}
-
-		const { value, error } = await run(
-			path.dirname(filePath),
-			path.basename(filePath),
-			ftxt,
-			false
-		);
-
-		if (error) return res.failure(error);
-
-		return res.success(
-			value.setPos(node.posStart, node.posEnd).setContext(context)
-		);
 	}
 }

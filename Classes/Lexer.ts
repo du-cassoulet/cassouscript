@@ -106,7 +106,11 @@ export default class Lexer {
 
 				return {
 					tokens: [],
-					error: new IllegalCharError(posStart, this.pos, "<ERROR>"),
+					error: new IllegalCharError(
+						posStart,
+						this.pos,
+						`Unexpected token '${this.currentChar}'`
+					),
 				};
 			}
 		}

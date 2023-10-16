@@ -1,0 +1,34 @@
+{
+	"name": "cassouscript",
+	"displayName": "CassouScript",
+	"description": "An extension for the CassouScript programming language.",
+	"version": "0.0.1",
+	"engines": {
+		"vscode": "^1.83.0"
+	},
+	"categories": [
+		"Programming Languages"
+	],
+	"contributes": {
+		"languages": [
+			{
+				"id": "cassouscript",
+				"aliases": [
+					"CassouScript",
+					"cassouscript"
+				],
+				"extensions": [
+					".csc"
+				],
+				"configuration": "./language-configuration.json"
+			}
+		],
+		"grammars": [
+			{
+				"language": "cassouscript",
+				"scopeName": "source.csc",
+				"path": "./syntaxes/cassouscript.tmLanguage.json"
+			}
+		]
+	}
+}

@@ -8,7 +8,6 @@ import chalk from "chalk";
 
 export default class Number extends Value {
 	public value: number;
-	static pi = new Number(Math.PI);
 
 	constructor(value: number) {
 		super();

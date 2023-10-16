@@ -17,5 +17,5 @@ export default Object.freeze({
 	EACH: "each",
 	TYPE: "type",
 	INCLUDE: "include",
-	EXPORT: "export",
+	WAITFOR: "waitfor",
 });
