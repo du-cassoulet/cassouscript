@@ -9,4 +9,7 @@ export default new Dictionary({
 	floor: BuiltInFunction.floor_math,
 	ceil: BuiltInFunction.ceil_math,
 	round: BuiltInFunction.round_math,
+	sin: BuiltInFunction.sin_math,
+	cos: BuiltInFunction.cos_math,
+	tan: BuiltInFunction.tan_math,
 });

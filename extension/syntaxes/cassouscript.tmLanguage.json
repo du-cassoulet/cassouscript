@@ -6,7 +6,31 @@
 			"include": "#keywords"
 		},
 		{
-			"include": "#strings"
+			"include": "#string"
+		},
+		{
+			"include": "#comments"
+		},
+		{
+			"include": "#declaration"
+		},
+		{
+			"include": "#punctutation"
+		},
+		{
+			"include": "#constant-language"
+		},
+		{
+			"include": "#number"
+		},
+		{
+			"include": "#operator"
+		},
+		{
+			"include": "#type"
+		},
+		{
+			"include": "#variable"
 		}
 	],
 	"repository": {
@@ -14,21 +38,80 @@
 			"patterns": [
 				{
 					"name": "keyword.control.cassouscript",
-					"match": "\\b(if|while|for|return)\\b"
+					"match": "\\b(%IF%|%ELSE%|%WHILE%|%FOR%|%RETURN%|%TO%|%EACH%|%CONTINUE%|%BREAK%|%INC%|%TYPE%|%WAITFOR%|%INCLUDE%|%IN%)\\b"
 				}
 			]
 		},
-		"strings": {
-			"name": "string.quoted.double.cassouscript",
-			"begin": "\"",
-			"end": "\"",
+		"string": {
 			"patterns": [
 				{
-					"name": "constant.character.escape.cassouscript",
-					"match": "\\\\."
+					"name": "string.quoted.double",
+					"begin": "\"",
+					"end": "\"",
+					"patterns": [
+						{
+							"name": "constant.character.escape",
+							"match": "\\\\."
+						}
+					]
+				},
+				{
+					"name": "string.quoted.single",
+					"begin": "'",
+					"end": "'",
+					"patterns": [
+						{
+							"name": "constant.character.escape",
+							"match": "\\\\."
+						}
+					]
+				}
+			]
+		},
+		"comments": {
+			"name": "comment.line",
+			"match": ">>.*$"
+		},
+		"number": {
+			"name": "constant.numeric",
+			"match": "(?<![a-zA-Z])\\.?(?:\\.?\\d)+\\b"
+		},
+		"declaration": {
+			"name": "keyword.other",
+			"match": "\\b(%SET%|%FUNC%|std|env|package)\\b"
+		},
+		"punctutation": {
+			"name": "punctuation",
+			"match": ";|,|:|@|(?!\\d)\\."
+		},
+		"constant-language": {
+			"name": "constant.language",
+			"match": "\\btrue|false|null|NaN\\b"
+		},
+		"operator": {
+			"patterns": [
+				{
+					"name": "storage.modifier",
+					"match": "(?:(?:\\+|-|\\*|\\/)?=)|(?:\\+|\\^|->?|\\*|\\/|\\||&|==)|%|(?:<|>)=?"
+				}
+			]
+		},
+		"type": {
+			"name": "entity.name.type",
+			"match": "\\b(String|Number|Void|Waitable|Function|BuiltInFunction|Boolean|Type|Dictionary|List)\\b"
+		},
+		"variable": {
+			"patterns": [
+				{
+					"name": "support.function",
+					"match": "\\b\\w+(?=\\s*(?:<.+>)?\\s*\\()"
+				},
+				{
+					"name": "variable",
+					"match": "\\w+"
 				}
 			]
 		}
 	},
-	"scopeName": "source.csc"
+	"scopeName": "source.%EXT%"
 }

@@ -5,6 +5,7 @@ import String from "./String";
 import Position from "../Position";
 import Context from "../Context";
 import chalk from "chalk";
+import List from "./List";
 
 export default class Number extends Value {
 	public value: number;
@@ -167,6 +168,19 @@ export default class Number extends Value {
 		if (other instanceof Number) {
 			return [
 				new Number(this.value || other.value).setContext(this.context),
+				null,
+			];
+		} else {
+			return [null, this.illegalOperation(other)];
+		}
+	}
+
+	public isIn(other: Value): any {
+		if (other instanceof List) {
+			return [
+				new Boolean(
+					other.elements.some((e) => e.getComparisonEq(this))
+				).setContext(this.context),
 				null,
 			];
 		} else {

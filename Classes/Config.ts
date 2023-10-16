@@ -8,6 +8,8 @@ const VERSION_REGEX = /^@version(?:\n|\s)+(?<value>[0-9]+(?:\.[0-9]+)*)$/;
 
 const DESCRIPTION_REGEX = /^@description(?:\n|\s)+(?<value>.+)$/;
 
+const EXTENSION_REGEX = /^@extension(?:\n|\s)+(?<value>[a-zA-Z0-9]+)$/;
+
 const ENV_REGEX = /^@env(?:\n|\s)+(?<name>[A-Z_]+)(?:\n|\s)*(?<value>.+)$/;
 
 const KEYWORD_REGEX =
@@ -28,6 +30,7 @@ export default class Config {
 	public keywords: { [key: string]: string };
 	public rules: { [key: string]: boolean };
 	public env: { [key: string]: string };
+	public extension: string;
 	public package: Package = {};
 	public error: string | null;
 
@@ -36,12 +39,15 @@ export default class Config {
 		this.keywords = { ...Keywords };
 		this.rules = { ...Rules };
 		this.env = {};
+		this.extension = "csc";
 		this.error = null;
 
 		this.load();
 	}
 
 	private load() {
+		if (!fs.existsSync(this.path)) return;
+
 		const raw = fs.readFileSync(this.path, "utf-8");
 		const declarations = raw.split(/(?<!\\);+/g);
 
@@ -84,6 +90,15 @@ export default class Config {
 				if (!name || !value) throw new Error("Invalid declaration");
 
 				this.env[name] = value;
+				return;
+			}
+
+			if (EXTENSION_REGEX.test(declaration)) {
+				const match = declaration.match(EXTENSION_REGEX);
+				const value = match?.groups?.value?.trim();
+				if (!value) throw new Error("Invalid declaration");
+
+				this.extension = value;
 				return;
 			}
 

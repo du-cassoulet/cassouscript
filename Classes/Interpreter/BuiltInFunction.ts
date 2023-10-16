@@ -18,6 +18,8 @@ import { JSONToNodes } from "../../utils";
 export default class BuiltInFunction extends BaseFunction {
 	public static log = new BuiltInFunction("log");
 	public static ask = new BuiltInFunction("ask");
+	public static clear = new BuiltInFunction("clear");
+	public static write = new BuiltInFunction("write");
 	public static sqrt = new BuiltInFunction("sqrt");
 	public static upper_text = new BuiltInFunction("upper_text");
 	public static lower_text = new BuiltInFunction("lower_text");
@@ -37,9 +39,15 @@ export default class BuiltInFunction extends BaseFunction {
 	public static put_request = new BuiltInFunction("put_request");
 	public static patch_request = new BuiltInFunction("patch_request");
 	public static delete_request = new BuiltInFunction("delete_request");
+	public static sin_math = new BuiltInFunction("sin_math");
+	public static cos_math = new BuiltInFunction("cos_math");
+	public static tan_math = new BuiltInFunction("tan_math");
+	public static color = new BuiltInFunction("color");
 
 	public args_log = ["value"];
 	public args_ask = ["value"];
+	public args_clear = [];
+	public args_write = ["value"];
 	public args_sqrt = ["value"];
 	public args_upper_text = ["value"];
 	public args_lower_text = ["value"];
@@ -59,6 +67,10 @@ export default class BuiltInFunction extends BaseFunction {
 	public args_put_request = ["url", "body"];
 	public args_patch_request = ["url", "body"];
 	public args_delete_request = ["url"];
+	public args_sin_math = ["value"];
+	public args_cos_math = ["value"];
+	public args_tan_math = ["value"];
+	public args_color = ["color", "value"];
 
 	constructor(name: string) {
 		super(name);
@@ -125,6 +137,19 @@ export default class BuiltInFunction extends BaseFunction {
 		}
 
 		return res.success(new String(response));
+	}
+
+	public execute_clear() {
+		console.clear();
+		return new RTResult().success(new Void(null));
+	}
+
+	public execute_write(execCtx: Context) {
+		const res = new RTResult();
+		const value = execCtx.symbolTable?.get("value");
+
+		process.stdout.write(value.toString());
+		return res.success(new Void(null));
 	}
 
 	public execute_sqrt(execCtx: Context) {
@@ -597,5 +622,108 @@ export default class BuiltInFunction extends BaseFunction {
 				})()
 			)
 		);
+	}
+
+	public execute_sin_math(execCtx: Context) {
+		const res = new RTResult();
+		const value = execCtx.symbolTable?.get("value");
+
+		if (!(value instanceof Number)) {
+			return res.failure(
+				new TypingError(
+					<Position>this.posStart,
+					<Position>this.posEnd,
+					"The value should be a number"
+				)
+			);
+		}
+
+		return res.success(new Number(Math.sin(value.value)));
+	}
+
+	public execute_cos_math(execCtx: Context) {
+		const res = new RTResult();
+		const value = execCtx.symbolTable?.get("value");
+
+		if (!(value instanceof Number)) {
+			return res.failure(
+				new TypingError(
+					<Position>this.posStart,
+					<Position>this.posEnd,
+					"The value should be a number"
+				)
+			);
+		}
+
+		return res.success(new Number(Math.cos(value.value)));
+	}
+
+	public execute_tan_math(execCtx: Context) {
+		const res = new RTResult();
+		const value = execCtx.symbolTable?.get("value");
+
+		if (!(value instanceof Number)) {
+			return res.failure(
+				new TypingError(
+					<Position>this.posStart,
+					<Position>this.posEnd,
+					"The value should be a number"
+				)
+			);
+		}
+
+		return res.success(new Number(Math.tan(value.value)));
+	}
+
+	public execute_color(execCtx: Context) {
+		const res = new RTResult();
+		const color = execCtx.symbolTable?.get("color");
+		const value = execCtx.symbolTable?.get("value");
+
+		const colors = [
+			"blue",
+			"green",
+			"red",
+			"yellow",
+			"cyan",
+			"magenta",
+			"gray",
+			"black",
+			"white",
+		];
+
+		if (!(color instanceof String)) {
+			return res.failure(
+				new TypingError(
+					<Position>this.posStart,
+					<Position>this.posEnd,
+					"The color should be a string"
+				)
+			);
+		}
+
+		if (!(value instanceof String)) {
+			return res.failure(
+				new TypingError(
+					<Position>this.posStart,
+					<Position>this.posEnd,
+					"The value should be a string"
+				)
+			);
+		}
+
+		if (!colors.includes(color.value)) {
+			return res.failure(
+				new TypingError(
+					<Position>this.posStart,
+					<Position>this.posEnd,
+					`Invalid color '${color.value}'`
+				)
+			);
+		}
+
+		// @ts-ignore
+		const colorify = chalk[color.value];
+		return res.success(new String(colorify(value.value)));
 	}
 }

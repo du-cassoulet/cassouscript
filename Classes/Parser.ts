@@ -289,7 +289,15 @@ export default class Parser {
 		}
 
 		const node = res.register(
-			this.binOp("compExpr", [TokenTypes.AND, TokenTypes.OR], "compExpr")
+			this.binOp(
+				"compExpr",
+				[
+					TokenTypes.AND,
+					TokenTypes.OR,
+					[TokenTypes.KEYWORD, this.config.keywords.IN],
+				],
+				"compExpr"
+			)
 		);
 
 		if (res.error) {

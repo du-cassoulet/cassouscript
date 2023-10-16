@@ -38,7 +38,7 @@ export default async function init(options: string[]) {
 	} else {
 		const name = await (<Promise<string>>(
 			ask(
-				chalk.blue("\u2022") + " Project name",
+				chalk.blue("\u2022 ") + "Project name",
 				/^[a-zA-Z0-9_-]+$/,
 				defaultName,
 				"The project name should only include letters, numbers, '_' and '-'."
@@ -47,7 +47,7 @@ export default async function init(options: string[]) {
 
 		const version = await (<Promise<string>>(
 			ask(
-				chalk.blue("\u2022") + " Project version",
+				chalk.blue("\u2022 ") + "Project version",
 				/^[0-9]+\.[0-9]+\.[0-9]+$/,
 				defaultVersion,
 				"The project version should be in the format 'x.x.x'."

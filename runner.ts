@@ -28,7 +28,15 @@ export async function run(
 	const { tokens, error } = lexer.makeToken();
 	if (error) return { value: null, error };
 
-	globalSymbolTable.set("package", JSONToNodes(config.package));
+	globalSymbolTable.set(
+		"package",
+		JSONToNodes({
+			...config.package,
+			ext: config.extension,
+			rules: config.rules,
+		})
+	);
+
 	globalSymbolTable.set("env", JSONToNodes(config.env));
 
 	const parser = new Parser(tokens, config);

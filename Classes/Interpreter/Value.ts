@@ -81,6 +81,10 @@ export default class Value {
 		return [null, this.illegalOperation(other)];
 	}
 
+	public isIn(other: Value) {
+		return [null, this.illegalOperation(other)];
+	}
+
 	public notted() {
 		return [null, this.illegalOperation()];
 	}

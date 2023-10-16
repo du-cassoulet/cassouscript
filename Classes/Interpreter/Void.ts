@@ -1,3 +1,5 @@
+import Boolean from "./Boolean";
+import List from "./List";
 import Value from "./Value";
 import chalk from "chalk";
 
@@ -7,6 +9,19 @@ export default class Void extends Value {
 	constructor(value: null | number) {
 		super();
 		this.value = value;
+	}
+
+	public isIn(other: Value): any {
+		if (other instanceof List) {
+			return [
+				new Boolean(
+					other.elements.some((e) => e.getComparisonEq(this))
+				).setContext(this.context),
+				null,
+			];
+		} else {
+			return [null, this.illegalOperation(other)];
+		}
 	}
 
 	public copy() {

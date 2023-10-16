@@ -2,7 +2,7 @@ node_modules/
 .git/
 test/
 .vscode
-**.it
+**.csc
 **.lockb
 .config
 .vscodeignore

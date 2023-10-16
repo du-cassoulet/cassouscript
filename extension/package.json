@@ -18,7 +18,7 @@
 					"cassouscript"
 				],
 				"extensions": [
-					".csc"
+					".%EXT%"
 				],
 				"configuration": "./language-configuration.json"
 			}
@@ -26,7 +26,7 @@
 		"grammars": [
 			{
 				"language": "cassouscript",
-				"scopeName": "source.csc",
+				"scopeName": "source.%EXT%",
 				"path": "./syntaxes/cassouscript.tmLanguage.json"
 			}
 		]

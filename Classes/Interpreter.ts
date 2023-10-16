@@ -45,6 +45,7 @@ import BuiltInFunction from "./Interpreter/BuiltInFunction";
 import Lexer from "./Lexer";
 import Config from "./Config";
 import Parser from "./Parser";
+import Color from "./Libraries/Color";
 
 export default class Interpreter {
 	public rootPath: string;
@@ -398,6 +399,10 @@ export default class Interpreter {
 			[result, error] = left.oredBy(right);
 		} else if (node.opTok.type === TokenTypes.AND) {
 			[result, error] = left.andedBy(right);
+		} else if (
+			node.opTok.matches(TokenTypes.KEYWORD, this.config.keywords.IN)
+		) {
+			[result, error] = left.isIn(right);
 		}
 
 		if (error) {
@@ -774,6 +779,7 @@ export default class Interpreter {
 				random: Random,
 				file: File,
 				request: Request,
+				color: Color,
 			});
 
 			if (!(rawPath.value in libraries)) {

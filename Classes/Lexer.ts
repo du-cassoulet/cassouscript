@@ -157,6 +157,7 @@ export default class Lexer {
 		const escapeCharacters: { [key: string]: string } = {
 			n: "\n",
 			t: "\t",
+			r: "\r",
 		};
 
 		while (

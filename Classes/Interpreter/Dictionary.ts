@@ -1,11 +1,16 @@
 import chalk from "chalk";
 import Value from "./Value";
 import BuiltInFunction from "./BuiltInFunction";
+import Number from "./Number";
 
 export default class Dictionary extends Value {
 	public static std = new Dictionary({
+		columns: new Number(process.stdout.columns),
+		rows: new Number(process.stdout.rows),
+		write: BuiltInFunction.write,
 		log: BuiltInFunction.log,
 		ask: BuiltInFunction.ask,
+		clear: BuiltInFunction.clear,
 	});
 
 	public entries: { [key: string]: any };

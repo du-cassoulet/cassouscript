@@ -18,4 +18,5 @@ export default Object.freeze({
 	TYPE: "type",
 	INCLUDE: "include",
 	WAITFOR: "waitfor",
+	IN: "in",
 });
