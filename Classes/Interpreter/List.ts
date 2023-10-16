@@ -6,6 +6,10 @@ import Number from "./Number";
 import Value from "./Value";
 
 export default class List extends Value {
+	public static methods: { [key: string]: any } = {
+		size: (list: List) => new Number(list.elements.length),
+	};
+
 	public elements: Value[];
 
 	constructor(elements: Value[]) {

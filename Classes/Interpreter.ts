@@ -152,7 +152,7 @@ export default class Interpreter {
 			);
 		}
 
-		for (let key of node.keys) {
+		for (let key of <any[]>node.keys) {
 			if (key instanceof BaseNode) {
 				const keyObj = res.register(await this.visit(key, context));
 				if (res.shouldReturn()) return res;
@@ -160,32 +160,39 @@ export default class Interpreter {
 			}
 
 			if (value instanceof Dictionary) {
-				if (<string>key in value.entries) {
-					value = value.entries[<string>key];
+				if (key in value.entries) {
+					value = value.entries[key];
 				} else {
 					return res.success(new Void(null));
 				}
 			} else if (value instanceof List) {
-				if (<number>(<unknown>key) < value.elements.length) {
-					value = value.elements[<number>(<unknown>key)];
+				if (key < value.elements.length) {
+					value = value.elements[key];
 				} else {
-					return res.success(new Void(null));
+					value = List.methods[key](value);
+
+					if (!value) {
+						return res.success(new Void(null));
+					}
 				}
 			} else if (value instanceof String) {
-				if (<number>(<unknown>key) < value.value.length) {
-					value = new String(value.value[<number>(<unknown>key)]);
+				if (key < value.value.length) {
+					value = new String(value.value[key]);
 				} else {
+					value = String.methods[key](value);
+
+					if (!value) {
+						return res.success(new Void(null));
+					}
+				}
+			} else if (value instanceof Number) {
+				value = Number.methods[key](value);
+
+				if (!value) {
 					return res.success(new Void(null));
 				}
 			} else {
-				return res.failure(
-					new RTError(
-						node.posStart,
-						node.posEnd,
-						`'${key}' is not defined in the variable '${varName}'`,
-						context
-					)
-				);
+				return res.success(new Void(null));
 			}
 		}
 
@@ -214,7 +221,7 @@ export default class Interpreter {
 
 		if (node.keys.length > 0) {
 			for (let i = 0; i < node.keys.length; i++) {
-				let key = node.keys[i];
+				let key: any = node.keys[i];
 
 				if (key instanceof BaseNode) {
 					const keyObj = res.register(await this.visit(key, context));
@@ -224,14 +231,14 @@ export default class Interpreter {
 
 				if (value instanceof Dictionary) {
 					if (i < node.keys.length - 1) {
-						if (<string>key in value.entries) {
-							value = value.entries[<string>key];
+						if (key in value.entries) {
+							value = value.entries[key];
 						} else {
 							return res.failure(
 								new RTError(
 									node.posStart,
 									node.posEnd,
-									`'${key}' is undefined in the variable '${varName}'`,
+									`'${key}' is not efined in the variable '${varName}'`,
 									context
 								)
 							);
@@ -246,34 +253,30 @@ export default class Interpreter {
 								break;
 
 							case TokenTypes.PLUSEQ:
-								[cleanValue, error] =
-									value.entries[<string>key].addedTo(newValue);
+								[cleanValue, error] = value.entries[key].addedTo(newValue);
 								break;
 
 							case TokenTypes.MINUSEQ:
-								[cleanValue, error] =
-									value.entries[<string>key].subbedBy(newValue);
+								[cleanValue, error] = value.entries[key].subbedBy(newValue);
 								break;
 
 							case TokenTypes.MULEQ:
-								[cleanValue, error] =
-									value.entries[<string>key].multedBy(newValue);
+								[cleanValue, error] = value.entries[key].multedBy(newValue);
 								break;
 
 							case TokenTypes.DIVEQ:
-								[cleanValue, error] =
-									value.entries[<string>key].divedBy(newValue);
+								[cleanValue, error] = value.entries[key].divedBy(newValue);
 								break;
 						}
 
 						if (error) res.failure(error);
-						value.entries[<string>key] = cleanValue;
+						value.entries[key] = cleanValue;
 						context.symbolTable?.set(varName, value);
 					}
 				} else if (value instanceof List) {
 					if (i < node.keys.length - 1) {
-						if (<number>(<unknown>key) < value.elements.length) {
-							value = value.elements[<number>(<unknown>key)];
+						if (key < value.elements.length) {
+							value = value.elements[key];
 						} else {
 							return res.failure(
 								new RTError(
@@ -294,28 +297,24 @@ export default class Interpreter {
 								break;
 
 							case TokenTypes.PLUSEQ:
-								[cleanValue, error] =
-									value.elements[<number>(<unknown>key)].addedTo(newValue);
+								[cleanValue, error] = value.elements[key].addedTo(newValue);
 								break;
 
 							case TokenTypes.MINUSEQ:
-								[cleanValue, error] =
-									value.elements[<number>(<unknown>key)].subbedBy(newValue);
+								[cleanValue, error] = value.elements[key].subbedBy(newValue);
 								break;
 
 							case TokenTypes.MULEQ:
-								[cleanValue, error] =
-									value.elements[<number>(<unknown>key)].multedBy(newValue);
+								[cleanValue, error] = value.elements[key].multedBy(newValue);
 								break;
 
 							case TokenTypes.DIVEQ:
-								[cleanValue, error] =
-									value.elements[<number>(<unknown>key)].divedBy(newValue);
+								[cleanValue, error] = value.elements[key].divedBy(newValue);
 								break;
 						}
 
 						if (error) res.failure(error);
-						value.elements[<number>(<unknown>key)] = cleanValue;
+						value.elements[key] = cleanValue;
 						context.symbolTable?.set(varName, value);
 					}
 				} else {

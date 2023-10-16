@@ -8,6 +8,8 @@ import chalk from "chalk";
 import List from "./List";
 
 export default class Number extends Value {
+	public static methods: { [key: string]: any } = {};
+
 	public value: number;
 
 	constructor(value: number) {

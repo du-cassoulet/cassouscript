@@ -5,6 +5,8 @@ import chalk from "chalk";
 import List from "./List";
 
 export default class String extends Value {
+	public static methods: { [key: string]: any } = {};
+
 	public value: string;
 
 	constructor(value: string) {
@@ -69,6 +71,11 @@ export default class String extends Value {
 				new Boolean(
 					other.elements.some((e) => e.getComparisonEq(this))
 				).setContext(this.context),
+				null,
+			];
+		} else if (other instanceof String) {
+			return [
+				new Boolean(other.value.includes(this.value)).setContext(this.context),
 				null,
 			];
 		} else {

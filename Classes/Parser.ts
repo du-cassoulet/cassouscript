@@ -893,20 +893,9 @@ export default class Parser {
 						)
 					);
 				}
-			} else if (this.currentTok.hasType(TokenTypes.ARROW)) {
-				res.registerAdvancement();
-				this.advance();
-
+			} else {
 				elseBody = res.register(this.statement());
 				if (res.error) return res;
-			} else {
-				return res.failure(
-					new InvalidSyntaxError(
-						this.currentTok.posStart,
-						this.currentTok.posEnd,
-						"Expected '{' or '->'"
-					)
-				);
 			}
 		}
 
