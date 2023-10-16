@@ -49,5 +49,5 @@ export async function run(
 		}
 	});
 
-	return result;
+	return { error: result.error, value: result.value };
 }

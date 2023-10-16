@@ -1,7 +1,9 @@
 node_modules/
 .git/
+test/
 .vscode
 **.it
 **.lockb
 .config
 .vscodeignore
+tsconfig.json
