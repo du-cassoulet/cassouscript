@@ -67,28 +67,198 @@ export default class Interpreter {
 		throw new Error(`No visit_${node.constructor.name} method defined`);
 	}
 
-	public visit_VoidNode(node: VoidNode, context: Context) {
-		let value = null;
-		if (node.tok.value === "NaN") value = NaN;
+	public async visit_VoidNode(node: VoidNode, context: Context) {
+		const res = new RTResult();
+		let value: any = new Void(node.tok.value === "NaN" ? NaN : null);
 
-		return new RTResult().success(
-			new Void(value).setContext(context).setPos(node.posStart, node.posEnd)
+		for (let key of <any[]>node.keys) {
+			if (key instanceof BaseNode) {
+				const keyObj = res.register(await this.visit(key, context));
+				if (res.shouldReturn()) return res;
+				key = keyObj.value;
+			}
+
+			if (value instanceof Dictionary) {
+				if (key in value.entries) {
+					value = value.entries[key];
+				} else {
+					return res.success(new Void(null));
+				}
+			} else if (value instanceof List) {
+				if (key < value.elements.length) {
+					value = value.elements[key];
+				} else {
+					value = List.methods[key]?.(value);
+
+					if (!value) {
+						return res.success(new Void(null));
+					}
+				}
+			} else if (value instanceof String) {
+				if (key < value.value.length) {
+					value = new String(value.value[key]);
+				} else {
+					value = String.methods[key]?.(value);
+
+					if (!value) {
+						return res.success(new Void(null));
+					}
+				}
+			} else if (value instanceof Number) {
+				value = Number.methods[key]?.(value);
+
+				if (!value) {
+					return res.success(new Void(null));
+				}
+			} else if (value instanceof Void) {
+				value = Void.methods[key]?.(value);
+
+				if (!value) {
+					return res.success(new Void(null));
+				}
+			} else if (value instanceof Boolean) {
+				value = Boolean.methods[key]?.(value);
+
+				if (!value) {
+					return res.success(new Void(null));
+				}
+			} else {
+				return res.success(new Void(null));
+			}
+		}
+
+		return res.success(
+			value.setContext(context).setPos(node.posStart, node.posEnd)
 		);
 	}
 
-	public visit_BooleanNode(node: BooleanNode, context: Context) {
-		return new RTResult().success(
-			new Boolean(node.tok.value === "true")
-				.setContext(context)
-				.setPos(node.posStart, node.posEnd)
+	public async visit_BooleanNode(node: BooleanNode, context: Context) {
+		const res = new RTResult();
+		let value: any = new Boolean(node.tok.value === "true");
+
+		for (let key of <any[]>node.keys) {
+			if (key instanceof BaseNode) {
+				const keyObj = res.register(await this.visit(key, context));
+				if (res.shouldReturn()) return res;
+				key = keyObj.value;
+			}
+
+			if (value instanceof Dictionary) {
+				if (key in value.entries) {
+					value = value.entries[key];
+				} else {
+					return res.success(new Void(null));
+				}
+			} else if (value instanceof List) {
+				if (key < value.elements.length) {
+					value = value.elements[key];
+				} else {
+					value = List.methods[key]?.(value);
+
+					if (!value) {
+						return res.success(new Void(null));
+					}
+				}
+			} else if (value instanceof String) {
+				if (key < value.value.length) {
+					value = new String(value.value[key]);
+				} else {
+					value = String.methods[key]?.(value);
+
+					if (!value) {
+						return res.success(new Void(null));
+					}
+				}
+			} else if (value instanceof Number) {
+				value = Number.methods[key]?.(value);
+
+				if (!value) {
+					return res.success(new Void(null));
+				}
+			} else if (value instanceof Void) {
+				value = Void.methods[key]?.(value);
+
+				if (!value) {
+					return res.success(new Void(null));
+				}
+			} else if (value instanceof Boolean) {
+				value = Boolean.methods[key]?.(value);
+
+				if (!value) {
+					return res.success(new Void(null));
+				}
+			} else {
+				return res.success(new Void(null));
+			}
+		}
+
+		return new value.success(
+			value.setContext(context).setPos(node.posStart, node.posEnd)
 		);
 	}
 
-	public visit_NumberNode(node: NumberNode, context: Context) {
-		return new RTResult().success(
-			new Number(node.tok.value)
-				.setContext(context)
-				.setPos(node.posStart, node.posEnd)
+	public async visit_NumberNode(node: NumberNode, context: Context) {
+		const res = new RTResult();
+		let value: any = new Number(node.tok.value);
+
+		for (let key of <any[]>node.keys) {
+			if (key instanceof BaseNode) {
+				const keyObj = res.register(await this.visit(key, context));
+				if (res.shouldReturn()) return res;
+				key = keyObj.value;
+			}
+
+			if (value instanceof Dictionary) {
+				if (key in value.entries) {
+					value = value.entries[key];
+				} else {
+					return res.success(new Void(null));
+				}
+			} else if (value instanceof List) {
+				if (key < value.elements.length) {
+					value = value.elements[key];
+				} else {
+					value = List.methods[key]?.(value);
+
+					if (!value) {
+						return res.success(new Void(null));
+					}
+				}
+			} else if (value instanceof String) {
+				if (key < value.value.length) {
+					value = new String(value.value[key]);
+				} else {
+					value = String.methods[key]?.(value);
+
+					if (!value) {
+						return res.success(new Void(null));
+					}
+				}
+			} else if (value instanceof Number) {
+				value = Number.methods[key]?.(value);
+
+				if (!value) {
+					return res.success(new Void(null));
+				}
+			} else if (value instanceof Void) {
+				value = Void.methods[key]?.(value);
+
+				if (!value) {
+					return res.success(new Void(null));
+				}
+			} else if (value instanceof Boolean) {
+				value = Boolean.methods[key]?.(value);
+
+				if (!value) {
+					return res.success(new Void(null));
+				}
+			} else {
+				return res.success(new Void(null));
+			}
+		}
+
+		return res.success(
+			value.setContext(context).setPos(node.posStart, node.posEnd)
 		);
 	}
 
@@ -101,8 +271,65 @@ export default class Interpreter {
 			if (res.shouldReturn()) return res;
 		}
 
+		let value: any = new List(elements);
+		for (let key of <any[]>node.keys) {
+			if (key instanceof BaseNode) {
+				const keyObj = res.register(await this.visit(key, context));
+				if (res.shouldReturn()) return res;
+				key = keyObj.value;
+			}
+
+			if (value instanceof Dictionary) {
+				if (key in value.entries) {
+					value = value.entries[key];
+				} else {
+					return res.success(new Void(null));
+				}
+			} else if (value instanceof List) {
+				if (key < value.elements.length) {
+					value = value.elements[key];
+				} else {
+					value = List.methods[key]?.(value);
+
+					if (!value) {
+						return res.success(new Void(null));
+					}
+				}
+			} else if (value instanceof String) {
+				if (key < value.value.length) {
+					value = new String(value.value[key]);
+				} else {
+					value = String.methods[key]?.(value);
+
+					if (!value) {
+						return res.success(new Void(null));
+					}
+				}
+			} else if (value instanceof Number) {
+				value = Number.methods[key]?.(value);
+
+				if (!value) {
+					return res.success(new Void(null));
+				}
+			} else if (value instanceof Void) {
+				value = Void.methods[key]?.(value);
+
+				if (!value) {
+					return res.success(new Void(null));
+				}
+			} else if (value instanceof Boolean) {
+				value = Boolean.methods[key]?.(value);
+
+				if (!value) {
+					return res.success(new Void(null));
+				}
+			} else {
+				return res.success(new Void(null));
+			}
+		}
+
 		return res.success(
-			new List(elements).setContext(context).setPos(node.posStart, node.posEnd)
+			value.setContext(context).setPos(node.posStart, node.posEnd)
 		);
 	}
 
@@ -121,18 +348,130 @@ export default class Interpreter {
 			if (res.shouldReturn()) return res;
 		}
 
+		let value: any = new Dictionary(entries);
+		for (let key of <any[]>node.keys) {
+			if (key instanceof BaseNode) {
+				const keyObj = res.register(await this.visit(key, context));
+				if (res.shouldReturn()) return res;
+				key = keyObj.value;
+			}
+
+			if (value instanceof Dictionary) {
+				if (key in value.entries) {
+					value = value.entries[key];
+				} else {
+					return res.success(new Void(null));
+				}
+			} else if (value instanceof List) {
+				if (key < value.elements.length) {
+					value = value.elements[key];
+				} else {
+					value = List.methods[key]?.(value);
+
+					if (!value) {
+						return res.success(new Void(null));
+					}
+				}
+			} else if (value instanceof String) {
+				if (key < value.value.length) {
+					value = new String(value.value[key]);
+				} else {
+					value = String.methods[key]?.(value);
+
+					if (!value) {
+						return res.success(new Void(null));
+					}
+				}
+			} else if (value instanceof Number) {
+				value = Number.methods[key]?.(value);
+
+				if (!value) {
+					return res.success(new Void(null));
+				}
+			} else if (value instanceof Void) {
+				value = Void.methods[key]?.(value);
+
+				if (!value) {
+					return res.success(new Void(null));
+				}
+			} else if (value instanceof Boolean) {
+				value = Boolean.methods[key]?.(value);
+
+				if (!value) {
+					return res.success(new Void(null));
+				}
+			} else {
+				return res.success(new Void(null));
+			}
+		}
+
 		return res.success(
-			new Dictionary(entries)
-				.setContext(context)
-				.setPos(node.posStart, node.posEnd)
+			value.setContext(context).setPos(node.posStart, node.posEnd)
 		);
 	}
 
-	public visit_StringNode(node: StringNode, context: Context) {
-		return new RTResult().success(
-			new String(node.tok.value)
-				.setContext(context)
-				.setPos(node.posStart, node.posEnd)
+	public async visit_StringNode(node: StringNode, context: Context) {
+		const res = new RTResult();
+		let value: any = new String(node.tok.value);
+
+		for (let key of <any[]>node.keys) {
+			if (key instanceof BaseNode) {
+				const keyObj = res.register(await this.visit(key, context));
+				if (res.shouldReturn()) return res;
+				key = keyObj.value;
+			}
+
+			if (value instanceof Dictionary) {
+				if (key in value.entries) {
+					value = value.entries[key];
+				} else {
+					return res.success(new Void(null));
+				}
+			} else if (value instanceof List) {
+				if (key < value.elements.length) {
+					value = value.elements[key];
+				} else {
+					value = List.methods[key]?.(value);
+
+					if (!value) {
+						return res.success(new Void(null));
+					}
+				}
+			} else if (value instanceof String) {
+				if (key < value.value.length) {
+					value = new String(value.value[key]);
+				} else {
+					value = String.methods[key]?.(value);
+
+					if (!value) {
+						return res.success(new Void(null));
+					}
+				}
+			} else if (value instanceof Number) {
+				value = Number.methods[key]?.(value);
+
+				if (!value) {
+					return res.success(new Void(null));
+				}
+			} else if (value instanceof Void) {
+				value = Void.methods[key]?.(value);
+
+				if (!value) {
+					return res.success(new Void(null));
+				}
+			} else if (value instanceof Boolean) {
+				value = Boolean.methods[key]?.(value);
+
+				if (!value) {
+					return res.success(new Void(null));
+				}
+			} else {
+				return res.success(new Void(null));
+			}
+		}
+
+		return res.success(
+			value.setContext(context).setPos(node.posStart, node.posEnd)
 		);
 	}
 
@@ -169,7 +508,7 @@ export default class Interpreter {
 				if (key < value.elements.length) {
 					value = value.elements[key];
 				} else {
-					value = List.methods[key](value);
+					value = List.methods[key]?.(value);
 
 					if (!value) {
 						return res.success(new Void(null));
@@ -179,14 +518,26 @@ export default class Interpreter {
 				if (key < value.value.length) {
 					value = new String(value.value[key]);
 				} else {
-					value = String.methods[key](value);
+					value = String.methods[key]?.(value);
 
 					if (!value) {
 						return res.success(new Void(null));
 					}
 				}
 			} else if (value instanceof Number) {
-				value = Number.methods[key](value);
+				value = Number.methods[key]?.(value);
+
+				if (!value) {
+					return res.success(new Void(null));
+				}
+			} else if (value instanceof Void) {
+				value = Void.methods[key]?.(value);
+
+				if (!value) {
+					return res.success(new Void(null));
+				}
+			} else if (value instanceof Boolean) {
+				value = Boolean.methods[key]?.(value);
 
 				if (!value) {
 					return res.success(new Void(null));

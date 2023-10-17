@@ -5,7 +5,9 @@ import chalk from "chalk";
 import List from "./List";
 
 export default class String extends Value {
-	public static methods: { [key: string]: any } = {};
+	public static methods: { [key: string]: any } = {
+		size: (string: String) => new Number(string.value.length),
+	};
 
 	public value: string;
 

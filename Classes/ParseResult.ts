@@ -35,7 +35,7 @@ export default class ParseResult {
 		return this.register(res);
 	}
 
-	public success(value: BaseNode) {
+	public success(value: any) {
 		this.node = value;
 		return this;
 	}

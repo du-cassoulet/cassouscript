@@ -2,6 +2,8 @@ import Value from "./Value";
 import chalk from "chalk";
 
 export default class Boolean extends Value {
+	public static methods: { [key: string]: any } = {};
+
 	public value: boolean;
 
 	constructor(value: boolean) {

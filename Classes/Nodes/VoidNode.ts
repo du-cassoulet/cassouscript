@@ -3,9 +3,11 @@ import BaseNode from "./BaseNode";
 
 export default class VoidNode extends BaseNode {
 	public tok: Token;
+	public keys: (BaseNode | string)[];
 
-	constructor(tok: Token) {
+	constructor(tok: Token, keys: (BaseNode | string)[]) {
 		super(tok.posStart, tok.posEnd);
 		this.tok = tok;
+		this.keys = keys;
 	}
 }

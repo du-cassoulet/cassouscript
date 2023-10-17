@@ -4,6 +4,8 @@ import Value from "./Value";
 import chalk from "chalk";
 
 export default class Void extends Value {
+	public static methods: { [key: string]: any } = {};
+
 	public value: null | number;
 
 	constructor(value: null | number) {

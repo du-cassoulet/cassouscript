@@ -114,7 +114,7 @@ export default class Parser {
 		}
 
 		return res.success(
-			new ListNode(statements, posStart, this.currentTok.posEnd.copy())
+			new ListNode(statements, [], posStart, this.currentTok.posEnd.copy())
 		);
 	}
 
@@ -467,6 +467,55 @@ export default class Parser {
 		return res.success(<BaseNode>atom);
 	}
 
+	private keys() {
+		const res = new ParseResult();
+		const keys: (BaseNode | string)[] = [];
+		const posStart = this.currentTok.posStart;
+
+		while (this.currentTok.hasType(TokenTypes.DOT, TokenTypes.LSQUARE)) {
+			if (this.currentTok.hasType(TokenTypes.DOT)) {
+				res.registerAdvancement();
+				this.advance();
+
+				if (!this.currentTok.hasType(TokenTypes.IDENTIFIER)) {
+					return res.failure(
+						new InvalidSyntaxError(
+							this.currentTok.posStart,
+							this.currentTok.posEnd,
+							"Expected identifier"
+						)
+					);
+				}
+
+				keys.push(this.currentTok.value);
+				res.registerAdvancement();
+				this.advance();
+			} else if (this.currentTok.hasType(TokenTypes.LSQUARE)) {
+				res.registerAdvancement();
+				this.advance();
+
+				const keyExpr = res.register(this.expr());
+				if (res.error) return res;
+				keys.push(keyExpr);
+
+				if (!this.currentTok.hasType(TokenTypes.RSQUARE)) {
+					return res.failure(
+						new ExpectedCharError(
+							this.currentTok.posStart,
+							this.currentTok.posEnd,
+							"Expected ']'"
+						)
+					);
+				}
+
+				res.registerAdvancement();
+				this.advance();
+			}
+		}
+
+		return res.success(keys);
+	}
+
 	private atom() {
 		const res = new ParseResult();
 		const tok = this.currentTok;
@@ -474,11 +523,19 @@ export default class Parser {
 		if (tok.hasType(TokenTypes.INT, TokenTypes.FLOAT)) {
 			res.registerAdvancement();
 			this.advance();
-			return res.success(new NumberNode(tok));
+
+			const keys = res.register(this.keys());
+			if (res.error) return res;
+
+			return res.success(new NumberNode(tok, keys));
 		} else if (tok.type === TokenTypes.STRING) {
 			res.registerAdvancement();
 			this.advance();
-			return res.success(new StringNode(tok));
+
+			const keys = res.register(this.keys());
+			if (res.error) return res;
+
+			return res.success(new StringNode(tok, keys));
 		} else if (tok.type === TokenTypes.TYPE) {
 			res.registerAdvancement();
 			this.advance();
@@ -489,14 +546,22 @@ export default class Parser {
 		) {
 			res.registerAdvancement();
 			this.advance();
-			return res.success(new BooleanNode(tok));
+
+			const keys = res.register(this.keys());
+			if (res.error) return res;
+
+			return res.success(new BooleanNode(tok, keys));
 		} else if (
 			tok.matches(TokenTypes.KEYWORD, this.config.keywords.NULL) ||
 			tok.matches(TokenTypes.KEYWORD, this.config.keywords.NAN)
 		) {
 			res.registerAdvancement();
 			this.advance();
-			return res.success(new VoidNode(tok));
+
+			const keys = res.register(this.keys());
+			if (res.error) return res;
+
+			return res.success(new VoidNode(tok, keys));
 		} else if (tok.type === TokenTypes.LSQUARE) {
 			const listExpr = res.register(this.listExpr());
 			if (res.error) return res;
@@ -508,48 +573,9 @@ export default class Parser {
 		} else if (tok.type === TokenTypes.IDENTIFIER) {
 			res.registerAdvancement();
 			this.advance();
-			const keys: (BaseNode | string)[] = [];
 
-			while (this.currentTok.hasType(TokenTypes.DOT, TokenTypes.LSQUARE)) {
-				if (this.currentTok.hasType(TokenTypes.DOT)) {
-					res.registerAdvancement();
-					this.advance();
-
-					if (!this.currentTok.hasType(TokenTypes.IDENTIFIER)) {
-						return res.failure(
-							new InvalidSyntaxError(
-								this.currentTok.posStart,
-								this.currentTok.posEnd,
-								"Expected identifier"
-							)
-						);
-					}
-
-					keys.push(this.currentTok.value);
-					res.registerAdvancement();
-					this.advance();
-				} else if (this.currentTok.hasType(TokenTypes.LSQUARE)) {
-					res.registerAdvancement();
-					this.advance();
-
-					const keyExpr = res.register(this.expr());
-					if (res.error) return res;
-					keys.push(keyExpr);
-
-					if (!this.currentTok.hasType(TokenTypes.RSQUARE)) {
-						return res.failure(
-							new ExpectedCharError(
-								this.currentTok.posStart,
-								this.currentTok.posEnd,
-								"Expected ']'"
-							)
-						);
-					}
-
-					res.registerAdvancement();
-					this.advance();
-				}
-			}
+			const keys = res.register(this.keys());
+			if (res.error) return res;
 
 			if (
 				this.currentTok.hasType(
@@ -694,8 +720,11 @@ export default class Parser {
 			this.advance();
 		}
 
+		const keys = res.register(this.keys());
+		if (res.error) return res;
+
 		return res.success(
-			new ListNode(elementNodes, posStart, this.currentTok.posEnd.copy())
+			new ListNode(elementNodes, keys, posStart, this.currentTok.posEnd.copy())
 		);
 	}
 
@@ -794,8 +823,16 @@ export default class Parser {
 		res.registerAdvancement();
 		this.advance();
 
+		const keys = res.register(this.keys());
+		if (res.error) return res;
+
 		return res.success(
-			new DictionaryNode(entryNodes, posStart, this.currentTok.posEnd.copy())
+			new DictionaryNode(
+				entryNodes,
+				keys,
+				posStart,
+				this.currentTok.posEnd.copy()
+			)
 		);
 	}
 
